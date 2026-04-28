@@ -1,0 +1,60 @@
+[project]
+name = "agent-skill-infra"
+version = "0.1.0"
+description = "Agent Skill infrastructure: quality check, behavior test runner, version awareness"
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.12"
+dependencies = []
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.24",
+    "pytest-cov>=6.0",
+    "ruff>=0.11",
+    "pyright>=1.1",
+    "typer>=0.15",
+    "rich>=13",
+    "jsonschema>=4.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.24",
+    "pytest-cov>=6.0",
+    "ruff>=0.11",
+    "pyright>=1.1",
+    "typer>=0.15",
+    "rich>=13",
+    "jsonschema>=4.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+addopts = "-v --tb=short"
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+src = ["src"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "UP", "B", "SIM", "RUF"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["skill_infra"]
+
+[tool.pyright]
+pythonVersion = "3.12"
+typeCheckingMode = "strict"
+venvPath = ".venv"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/skill_infra"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
