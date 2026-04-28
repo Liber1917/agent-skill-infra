@@ -8,7 +8,7 @@ def test_package_importable():
 
 
 def test_submodules_importable():
-    from skill_infra import shared, quality_check, test_runner, version_aware
+    from skill_infra import quality_check, shared, test_runner, version_aware
 
     assert shared is not None
     assert quality_check is not None
