@@ -9,6 +9,7 @@ from pathlib import Path
 
 from skill_infra.shared.adapter import AgentAdapter
 from skill_infra.shared.types import EvalCase, EvalReport, EvalResult
+from skill_infra.test_runner.judgers.flow import FlowJudge
 from skill_infra.test_runner.judgers.keyword import KeywordJudger
 from skill_infra.test_runner.judgers.llm_stub import LLMStubJudger
 from skill_infra.test_runner.judgers.schema import SchemaJudger
@@ -18,6 +19,7 @@ _DEFAULT_JUDGER_REGISTRY = {
     "keyword": KeywordJudger(),
     "schema": SchemaJudger(),
     "llm": LLMStubJudger(),
+    "flow": FlowJudge(),
 }
 
 
