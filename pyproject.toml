@@ -13,6 +13,7 @@ dependencies = [
 
 [project.scripts]
 skill-test = "skill_infra.test_runner.cli:app"
+skill-quality = "skill_infra.quality_check.cli:app"
 
 [dependency-groups]
 dev = [
