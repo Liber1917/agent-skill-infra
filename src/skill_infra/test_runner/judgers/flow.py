@@ -78,10 +78,7 @@ class FlowJudge(Judger):
     ) -> tuple[bool, float, str]:
         """Strict order: actual must match expected exactly in sequence."""
         if len(actual) != len(expected):
-            return False, 0.0, (
-                f"Tool count mismatch: expected {len(expected)}, "
-                f"got {len(actual)}"
-            )
+            return False, 0.0, (f"Tool count mismatch: expected {len(expected)}, got {len(actual)}")
 
         for i, exp_tool in enumerate(expected):
             act_tool = actual[i]
@@ -89,21 +86,21 @@ class FlowJudge(Judger):
             act_name = act_tool.get("name", "")
 
             if exp_name != act_name:
-                return False, i / len(expected), (
-                    f"Tool mismatch at position {i}: expected {exp_name!r}, "
-                    f"got {act_name!r}"
+                return (
+                    False,
+                    i / len(expected),
+                    (f"Tool mismatch at position {i}: expected {exp_name!r}, got {act_name!r}"),
                 )
 
             # Check args_contains
             args_contains = exp_tool.get("args_contains")
             if args_contains:
-                match, detail = self._check_args(
-                    act_tool.get("args", {}), args_contains
-                )
+                match, detail = self._check_args(act_tool.get("args", {}), args_contains)
                 if not match:
-                    return False, i / len(expected), (
-                        f"Args mismatch at position {i} for {exp_name!r}: "
-                        f"{detail}"
+                    return (
+                        False,
+                        i / len(expected),
+                        (f"Args mismatch at position {i} for {exp_name!r}: {detail}"),
                     )
 
         return True, 1.0, "Tool sequence matches exactly (strict order)"
@@ -139,9 +136,7 @@ class FlowJudge(Judger):
                 actual_idx += 1
 
             if not found:
-                return False, matched / len(expected), (
-                    f"Missing expected tool: {exp_name!r}"
-                )
+                return False, matched / len(expected), (f"Missing expected tool: {exp_name!r}")
 
         return True, 1.0, "All expected tools found in sequence (relaxed)"
 
@@ -155,8 +150,5 @@ class FlowJudge(Judger):
             if key not in actual_args:
                 return False, f"missing arg {key!r}"
             if actual_args[key] != value:
-                return False, (
-                    f"arg {key!r}: expected {value!r}, "
-                    f"got {actual_args[key]!r}"
-                )
+                return False, (f"arg {key!r}: expected {value!r}, got {actual_args[key]!r}")
         return True, ""

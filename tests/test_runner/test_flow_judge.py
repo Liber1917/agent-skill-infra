@@ -22,11 +22,13 @@ class TestFlowJudge:
     # -- basic matching --
 
     def test_exact_sequence_match(self) -> None:
-        output = self._output([
-            {"name": "read_file", "args": {"path": "/tmp/a.txt"}},
-            {"name": "edit_file", "args": {"path": "/tmp/a.txt", "content": "new"}},
-            {"name": "write_file", "args": {"path": "/tmp/a.txt"}},
-        ])
+        output = self._output(
+            [
+                {"name": "read_file", "args": {"path": "/tmp/a.txt"}},
+                {"name": "edit_file", "args": {"path": "/tmp/a.txt", "content": "new"}},
+                {"name": "write_file", "args": {"path": "/tmp/a.txt"}},
+            ]
+        )
         expected = {
             "tool_sequence": [
                 {"name": "read_file"},
@@ -41,10 +43,12 @@ class TestFlowJudge:
         assert "sequence" in reason.lower() or "match" in reason.lower()
 
     def test_missing_tool(self) -> None:
-        output = self._output([
-            {"name": "read_file", "args": {}},
-            {"name": "write_file", "args": {}},
-        ])
+        output = self._output(
+            [
+                {"name": "read_file", "args": {}},
+                {"name": "write_file", "args": {}},
+            ]
+        )
         expected = {
             "tool_sequence": [
                 {"name": "read_file"},
@@ -58,11 +62,13 @@ class TestFlowJudge:
         assert "edit_file" in reason
 
     def test_wrong_order_strict(self) -> None:
-        output = self._output([
-            {"name": "edit_file", "args": {}},
-            {"name": "read_file", "args": {}},
-            {"name": "write_file", "args": {}},
-        ])
+        output = self._output(
+            [
+                {"name": "edit_file", "args": {}},
+                {"name": "read_file", "args": {}},
+                {"name": "write_file", "args": {}},
+            ]
+        )
         expected = {
             "tool_sequence": [
                 {"name": "read_file"},
@@ -76,12 +82,14 @@ class TestFlowJudge:
         assert "mismatch" in reason.lower() or "order" in reason.lower()
 
     def test_wrong_order_relaxed(self) -> None:
-        output = self._output([
-            {"name": "read_file", "args": {}},
-            {"name": "other_tool", "args": {}},
-            {"name": "edit_file", "args": {}},
-            {"name": "write_file", "args": {}},
-        ])
+        output = self._output(
+            [
+                {"name": "read_file", "args": {}},
+                {"name": "other_tool", "args": {}},
+                {"name": "edit_file", "args": {}},
+                {"name": "write_file", "args": {}},
+            ]
+        )
         expected = {
             "tool_sequence": [
                 {"name": "read_file"},
@@ -96,11 +104,13 @@ class TestFlowJudge:
 
     def test_extra_tools_allowed_strict(self) -> None:
         """Extra tools before the expected sequence should fail in strict mode."""
-        output = self._output([
-            {"name": "search_file", "args": {}},
-            {"name": "read_file", "args": {}},
-            {"name": "edit_file", "args": {}},
-        ])
+        output = self._output(
+            [
+                {"name": "search_file", "args": {}},
+                {"name": "read_file", "args": {}},
+                {"name": "edit_file", "args": {}},
+            ]
+        )
         expected = {
             "tool_sequence": [
                 {"name": "read_file"},
@@ -113,12 +123,14 @@ class TestFlowJudge:
 
     def test_extra_tools_allowed_relaxed(self) -> None:
         """Extra tools are allowed in relaxed mode as long as core sequence exists."""
-        output = self._output([
-            {"name": "search_file", "args": {}},
-            {"name": "read_file", "args": {}},
-            {"name": "list_dir", "args": {}},
-            {"name": "edit_file", "args": {}},
-        ])
+        output = self._output(
+            [
+                {"name": "search_file", "args": {}},
+                {"name": "read_file", "args": {}},
+                {"name": "list_dir", "args": {}},
+                {"name": "edit_file", "args": {}},
+            ]
+        )
         expected = {
             "tool_sequence": [
                 {"name": "read_file"},
@@ -132,10 +144,12 @@ class TestFlowJudge:
     # -- args_contains --
 
     def test_args_contains_check(self) -> None:
-        output = self._output([
-            {"name": "read_file", "args": {"filePath": "/tmp/a.txt"}},
-            {"name": "edit_file", "args": {"filePath": "/tmp/a.txt", "newContent": "hello"}},
-        ])
+        output = self._output(
+            [
+                {"name": "read_file", "args": {"filePath": "/tmp/a.txt"}},
+                {"name": "edit_file", "args": {"filePath": "/tmp/a.txt", "newContent": "hello"}},
+            ]
+        )
         expected = {
             "tool_sequence": [
                 {"name": "read_file", "args_contains": {"filePath": "/tmp/a.txt"}},
@@ -146,9 +160,11 @@ class TestFlowJudge:
         assert passed is True
 
     def test_args_contains_mismatch(self) -> None:
-        output = self._output([
-            {"name": "read_file", "args": {"filePath": "/tmp/b.txt"}},
-        ])
+        output = self._output(
+            [
+                {"name": "read_file", "args": {"filePath": "/tmp/b.txt"}},
+            ]
+        )
         expected = {
             "tool_sequence": [
                 {"name": "read_file", "args_contains": {"filePath": "/tmp/a.txt"}},
@@ -184,10 +200,12 @@ class TestFlowJudge:
 
     def test_default_strict_order_true(self) -> None:
         """When strict_order is not specified, default to True."""
-        output = self._output([
-            {"name": "read_file", "args": {}},
-            {"name": "edit_file", "args": {}},
-        ])
+        output = self._output(
+            [
+                {"name": "read_file", "args": {}},
+                {"name": "edit_file", "args": {}},
+            ]
+        )
         expected = {
             "tool_sequence": [
                 {"name": "read_file"},
@@ -199,11 +217,13 @@ class TestFlowJudge:
 
     def test_partial_score(self) -> None:
         """Score should reflect how many expected tools were found."""
-        output = self._output([
-            {"name": "read_file", "args": {}},
-            # edit_file is missing
-            {"name": "write_file", "args": {}},
-        ])
+        output = self._output(
+            [
+                {"name": "read_file", "args": {}},
+                # edit_file is missing
+                {"name": "write_file", "args": {}},
+            ]
+        )
         expected = {
             "tool_sequence": [
                 {"name": "read_file"},
