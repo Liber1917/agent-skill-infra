@@ -9,6 +9,7 @@ from pathlib import Path
 
 import typer
 
+from skill_infra.shared.evals_schema import EvalsValidationError
 from skill_infra.shared.types import EvalReport, EvalResult
 from skill_infra.test_runner.adapters.mock import MockAdapter
 from skill_infra.test_runner.report import print_table, report_to_json
@@ -35,14 +36,19 @@ def run(
         typer.echo(f"Unknown adapter: {adapter!r}. Only 'mock' is supported in Phase 1.", err=True)
         raise typer.Exit(code=1)
 
-    runner = SkillTestRunner.from_evals_file(evals_file, agent)
+    try:
+        runner = SkillTestRunner.from_evals_file(evals_file, agent)
+    except EvalsValidationError as exc:
+        typer.echo(f"Invalid evals.json: {exc}", err=True)
+        raise typer.Exit(code=1) from None
     if not runner.cases:
         typer.echo(f"No test cases found in {evals_file}", err=True)
         raise typer.Exit(code=1)
 
     typer.echo(f"Running {len(runner.cases)} test cases with '{adapter}' adapter...\n")
 
-    report = asyncio.run(_run_with_fail_fast(runner, runner.cases, evals_file.stem, fail_fast))
+    skill_name = getattr(runner, "_skill_name", evals_file.stem)
+    report = asyncio.run(_run_with_fail_fast(runner, runner.cases, skill_name, fail_fast))
 
     if output == "json":
         typer.echo(report_to_json(report))

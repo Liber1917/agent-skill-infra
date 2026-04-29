@@ -87,7 +87,7 @@ class TestCLIRun:
         import json
 
         f = tmp_path / "evals.json"
-        f.write_text(json.dumps({"skill": "test", "cases": []}))
+        f.write_text(json.dumps({"skill": "test", "version": "0.1.0", "cases": []}))
 
         result = runner.invoke(app, ["run", str(f)])
         assert result.exit_code == 1

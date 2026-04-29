@@ -8,6 +8,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 from skill_infra.shared.adapter import AgentAdapter
+from skill_infra.shared.evals_schema import validate_evals
 from skill_infra.shared.types import EvalCase, EvalReport, EvalResult
 from skill_infra.test_runner.judgers.flow import FlowJudge
 from skill_infra.test_runner.judgers.keyword import KeywordJudger
@@ -67,6 +68,9 @@ class SkillTestRunner:
             }
         """
         raw = json.loads(Path(path).read_text(encoding="utf-8"))
+        validate_evals(raw)
+        skill_name = raw.get("skill", "unknown")
+        version = raw.get("version", "0.0.0")
         runner = cls(adapter=adapter)
         runner.cases = [
             EvalCase(
@@ -79,6 +83,8 @@ class SkillTestRunner:
             )
             for c in raw.get("cases", [])
         ]
+        runner._skill_name = skill_name  # type: ignore[attr-defined]
+        runner._skill_version = version  # type: ignore[attr-defined]
         return runner
 
     # ------------------------------------------------------------------
