@@ -1,0 +1,37 @@
+{
+  "skill": "quality-check",
+  "version": "0.1.0",
+  "cases": [
+    {
+      "id": "tc-smoke-001",
+      "prompt": "帮我检查这个 SKILL.md 的质量",
+      "expected": { "keywords": ["质量", "评分"] },
+      "judge_type": "keyword",
+      "tags": ["smoke"],
+      "timeout": 30
+    },
+    {
+      "id": "tc-smoke-002",
+      "prompt": "分析这段技能描述的触发条件是否合理",
+      "expected": { "keywords": ["触发"] },
+      "judge_type": "keyword",
+      "tags": ["smoke"],
+      "timeout": 30
+    },
+    {
+      "id": "tc-smoke-003",
+      "prompt": "请输出一个符合格式的评分结果",
+      "expected": {
+        "type": "object",
+        "properties": {
+          "score": { "type": "number" },
+          "summary": { "type": "string" }
+        },
+        "required": ["score", "summary"]
+      },
+      "judge_type": "schema",
+      "tags": ["smoke"],
+      "timeout": 30
+    }
+  ]
+}

@@ -6,31 +6,35 @@ requires-python = ">=3.12"
 name = "agent-skill-infra"
 version = "0.1.0"
 source = { editable = "." }
+dependencies = [
+    { name = "jsonschema" },
+    { name = "rich" },
+    { name = "typer" },
+]
 
 [package.dev-dependencies]
 dev = [
-    { name = "jsonschema" },
     { name = "pyright" },
     { name = "pytest" },
     { name = "pytest-asyncio" },
     { name = "pytest-cov" },
-    { name = "rich" },
     { name = "ruff" },
-    { name = "typer" },
 ]
 
 [package.metadata]
+requires-dist = [
+    { name = "jsonschema", specifier = ">=4.0" },
+    { name = "rich", specifier = ">=13" },
+    { name = "typer", specifier = ">=0.15" },
+]
 
 [package.metadata.requires-dev]
 dev = [
-    { name = "jsonschema", specifier = ">=4.0" },
     { name = "pyright", specifier = ">=1.1" },
     { name = "pytest", specifier = ">=8.0" },
     { name = "pytest-asyncio", specifier = ">=0.24" },
     { name = "pytest-cov", specifier = ">=6.0" },
-    { name = "rich", specifier = ">=13" },
     { name = "ruff", specifier = ">=0.11" },
-    { name = "typer", specifier = ">=0.15" },
 ]
 
 [[package]]

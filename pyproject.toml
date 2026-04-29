@@ -5,7 +5,14 @@ description = "Agent Skill infrastructure: quality check, behavior test runner, 
 readme = "README.md"
 license = { text = "MIT" }
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+    "typer>=0.15",
+    "rich>=13",
+    "jsonschema>=4.0",
+]
+
+[project.scripts]
+skill-test = "skill_infra.test_runner.cli:app"
 
 [dependency-groups]
 dev = [
@@ -14,9 +21,6 @@ dev = [
     "pytest-cov>=6.0",
     "ruff>=0.11",
     "pyright>=1.1",
-    "typer>=0.15",
-    "rich>=13",
-    "jsonschema>=4.0",
 ]
 
 [tool.pytest.ini_options]
@@ -31,6 +35,9 @@ src = ["src"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "N", "UP", "B", "SIM", "RUF"]
+
+[tool.ruff.lint.per-file-ignores]
+"src/skill_infra/test_runner/cli.py" = ["B008"]  # Typer requires function-call defaults
 
 [tool.ruff.lint.isort]
 known-first-party = ["skill_infra"]
