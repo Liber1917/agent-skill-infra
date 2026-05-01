@@ -1,15 +1,30 @@
 [project]
 name = "agent-skill-infra"
-version = "0.1.0"
+version = "0.2.0"
 description = "Agent Skill infrastructure: quality check, behavior test runner, version awareness"
 readme = "README.md"
 license = { text = "MIT" }
 requires-python = ">=3.12"
+authors = [{ name = "Liber1917" }]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Quality Assurance",
+    "Topic :: Software Development :: Testing",
+    "Topic :: Software Development :: Version Control",
+]
 dependencies = [
     "typer>=0.15",
     "rich>=13",
     "jsonschema>=4.0",
 ]
+
+[project.urls]
+Homepage = "https://github.com/Liber1917/agent-skill-infra"
+Repository = "https://github.com/Liber1917/agent-skill-infra"
+Issues = "https://github.com/Liber1917/agent-skill-infra/issues"
 
 [project.scripts]
 skill-test = "skill_infra.test_runner.cli:app"

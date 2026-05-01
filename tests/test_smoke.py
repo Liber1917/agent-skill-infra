@@ -4,7 +4,7 @@
 def test_package_importable():
     import skill_infra
 
-    assert skill_infra.__version__ == "0.1.0"
+    assert skill_infra.__version__ == "0.2.0"
 
 
 def test_submodules_importable():
