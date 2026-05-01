@@ -479,27 +479,39 @@ def generate_report(
 
 
 def main() -> int:
-    issue_number = os.environ.get("ISSUE_NUMBER", "")
-    issue_body = os.environ.get("ISSUE_BODY", "")
+    trigger_source = os.environ.get("TRIGGER_SOURCE", "")
+    is_dispatch = trigger_source == "workflow_dispatch"
 
-    if not issue_number or not issue_body:
-        print("Error: ISSUE_NUMBER or ISSUE_BODY not set", file=sys.stderr)
-        return 1
-
-    # Parse
-    fields = parse_issue_body(issue_body)
-    repo_url = fields.get("repo_url", "")
-    branch = fields.get("branch", "main") or "main"
-    custom_cmd = fields.get("test_command", "")
-
-    if not repo_url:
-        # Try regex as fallback
-        extracted = extract_repo_url(issue_body)
-        if extracted:
-            repo_url = f"https://github.com/{extracted[0]}/{extracted[1]}"
-        else:
-            _post_comment(issue_number, "Could not find a repository URL in the issue.")
+    # Dispatch mode: read from workflow inputs
+    if is_dispatch:
+        repo_url = os.environ.get("REPO_URL", "")
+        branch = os.environ.get("BRANCH", "main")
+        custom_cmd = os.environ.get("TEST_COMMAND", "")
+        if not repo_url:
+            print("Error: REPO_URL not set", file=sys.stderr)
             return 1
+        issue_number = ""  # no comment to post in dispatch mode
+        print(f"[dispatch] Testing: {repo_url} @ {branch}")
+    else:
+        issue_number = os.environ.get("ISSUE_NUMBER", "")
+        issue_body = os.environ.get("ISSUE_BODY", "")
+        if not issue_number or not issue_body:
+            print("Error: ISSUE_NUMBER or ISSUE_BODY not set", file=sys.stderr)
+            return 1
+
+        # Parse
+        fields = parse_issue_body(issue_body)
+        repo_url = fields.get("repo_url", "")
+        branch = fields.get("branch", "main") or "main"
+        custom_cmd = fields.get("test_command", "")
+
+        if not repo_url:
+            extracted = extract_repo_url(issue_body)
+            if extracted:
+                repo_url = f"https://github.com/{extracted[0]}/{extracted[1]}"
+            else:
+                _post_comment(issue_number, "Could not find a repository URL in the issue.")
+                return 1
 
     print(f"Testing: {repo_url} @ {branch}")
 
@@ -545,7 +557,10 @@ def main() -> int:
 
     # Report
     report = generate_report(repo_url, project_type, branch, result, duration)
-    _post_comment(issue_number, report)
+    if is_dispatch:
+        print(report)
+    else:
+        _post_comment(issue_number, report)
 
     # Exit code follows test result
     return 1 if result.get("failed", 0) > 0 or result.get("exit_code", 0) != 0 else 0

@@ -3,6 +3,21 @@ name: Issue-Triggered Test
 on:
   issues:
     types: [labeled]
+  workflow_dispatch:
+    inputs:
+      repo_url:
+        description: "GitHub repository URL"
+        required: true
+        type: string
+      branch:
+        description: "Branch name"
+        required: false
+        default: "main"
+        type: string
+      test_command:
+        description: "Custom test command (optional)"
+        required: false
+        type: string
 
 permissions:
   issues: write
@@ -10,12 +25,11 @@ permissions:
   models: read
 
 concurrency:
-  group: issue-test-${{ github.event.issue.number }}
+  group: issue-test-${{ github.event.issue.number || 'dispatch' }}
   cancel-in-progress: true
 
 jobs:
   test-on-issue:
-    if: contains(github.event.issue.labels.*.name, 'test-request')
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -36,8 +50,12 @@ jobs:
       - name: Run issue tester
         run: uv run python scripts/ci/issue_tester.py
         env:
-          ISSUE_NUMBER: ${{ github.event.issue.number }}
-          ISSUE_BODY: ${{ github.event.issue.body }}
+          ISSUE_NUMBER: ${{ github.event.issue.number || '' }}
+          ISSUE_BODY: ${{ github.event.issue.body || '' }}
+          TRIGGER_SOURCE: ${{ github.event_name }}
+          REPO_URL: ${{ inputs.repo_url || '' }}
+          BRANCH: ${{ inputs.branch || 'main' }}
+          TEST_COMMAND: ${{ inputs.test_command || '' }}
           GITHUB_REPOSITORY: ${{ github.repository }}
           GH_TOKEN: ${{ github.token }}
           GITHUB_TOKEN: ${{ github.token }}
