@@ -1,0 +1,42 @@
+# agent-skill-infra
+
+> Quality infrastructure for Agent Skills — testing, scoring, versioning.
+
+## Quick facts
+
+- Python 3.12+ CLI toolkit, MIT licensed
+- 221 tests, PyPI published (v0.3.0)
+- Three modules: skill-quality, skill-test, skill-version
+- Three evaluation tiers: keyword → Anthropic Claude → GitHub Models (free)
+
+## Install
+
+```bash
+pip install agent-skill-infra
+skill-quality /path/to/skill/SKILL.md --gh-models
+```
+
+## Key files
+
+- `src/skill_infra/quality_check/` — 8-dimension scoring with LLM evaluators
+- `src/skill_infra/quality_check/gh_model_quality.py` — Free GitHub Models integration
+- `src/skill_infra/test_runner/` — Behavior test runner, 5 judge types
+- `src/skill_infra/version_aware/` — Git diff, rollback, regression detection
+- `scripts/ci/issue_tester.py` — Issue-triggered testing (clone → detect → test → report)
+- `tests/` — 221 tests
+- `pyproject.toml` — Package metadata and tool config
+
+## Entry points
+
+| CLI | Function |
+|-----|----------|
+| `skill-quality` | Score SKILL.md quality (0-100%) with improvement suggestions |
+| `skill-test` | Run behavior tests from evals.json |
+| `skill-version` | Version diff, rollback, baseline comparison |
+
+## For AI agents
+
+- Read `AGENTS.md` for contribution guide and design constraints
+- Read `docs/history/RETROSPECTIVE.md` for project evolution
+- Read `docs/reports/` for test reports
+- Issue testing: https://github.com/Liber1917/agent-skill-infra/issues/new?template=test-request.yml
