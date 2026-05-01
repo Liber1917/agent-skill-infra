@@ -1,6 +1,6 @@
 [project]
 name = "agent-skill-infra"
-version = "0.2.0"
+version = "0.3.0"
 description = "Agent Skill infrastructure: quality check, behavior test runner, version awareness"
 readme = "README.md"
 license = { text = "MIT" }
