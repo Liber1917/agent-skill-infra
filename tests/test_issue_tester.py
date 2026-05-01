@@ -82,6 +82,18 @@ other stuff"""
 
 
 class TestDetectProjectType:
+    def test_detects_skill(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            (Path(td) / "SKILL.md").write_text("---\nname: test\n---")
+            assert detect_project_type(Path(td)) == "skill"
+
+    def test_skill_before_python(self) -> None:
+        """SKILL.md takes priority over pyproject.toml."""
+        with tempfile.TemporaryDirectory() as td:
+            (Path(td) / "SKILL.md").write_text("---\nname: test\n---")
+            (Path(td) / "pyproject.toml").write_text("[project]\nname='test'")
+            assert detect_project_type(Path(td)) == "skill"
+
     def test_detects_python(self) -> None:
         with tempfile.TemporaryDirectory() as td:
             (Path(td) / "pyproject.toml").write_text("[project]\nname='test'")

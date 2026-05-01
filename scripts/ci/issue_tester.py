@@ -103,6 +103,10 @@ def detect_project_type(repo_dir: Path) -> str:
     files = {f.name for f in repo_dir.iterdir() if f.is_file()}
     dirs = {d.name for d in repo_dir.iterdir() if d.is_dir()}
 
+    # Single SKILL.md at root — pure skill repo (most common case)
+    if "SKILL.md" in files:
+        return "skill"
+
     # Bun project
     if "bun.lock" in files or "bunfig.toml" in files:
         return "bun"
@@ -182,6 +186,20 @@ def run_tests(repo_dir: Path, project_type: str, custom_cmd: str = "") -> dict[s
                 [sys.executable, "-m", "pytest", "-q", "--tb=line"], TIMEOUT_TEST
             )
             return _build_result(rc, stdout, stderr, "pytest", error_type=err)
+
+    if project_type == "skill":
+        # Single SKILL.md repo — use skill-quality for scoring
+        skill_md = repo_dir / "SKILL.md"
+        if not skill_md.exists():
+            return _build_result(
+                -1, "", "SKILL.md not found", "skill-quality",
+                error_type="unknown_type",
+            )
+        rc, stdout, stderr, err = _run(
+            ["uv", "run", "skill-quality", "check", str(skill_md), "--output", "json"],
+            TIMEOUT_TEST,
+        )
+        return _build_result(rc, stdout, stderr, "skill-quality check", error_type=err)
 
     if project_type == "config":
         # Count and validate configuration files
