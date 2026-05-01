@@ -62,13 +62,15 @@ def test_judger_export_count() -> None:
     """judgers/__init__.py exports 7 names (6 judges + base Judger ABC)."""
     exports = _exported_names("skill_infra.test_runner.judgers")
     expected = {
-        "KeywordJudger", "SchemaJudger", "LLMStubJudger",
-        "FlowJudge", "LLMJudge", "SnapshotJudger", "Judger",
+        "KeywordJudger",
+        "SchemaJudger",
+        "LLMStubJudger",
+        "FlowJudge",
+        "LLMJudge",
+        "SnapshotJudger",
+        "Judger",
     }
-    msg = (
-        f"Unexpected exports: {exports - expected}"
-        f" or missing: {expected - exports}"
-    )
+    msg = f"Unexpected exports: {exports - expected} or missing: {expected - exports}"
     assert exports == expected, msg
 
 
@@ -98,8 +100,7 @@ def test_judge_type_in_schema() -> None:
     from skill_infra.test_runner.runner import _DEFAULT_JUDGER_REGISTRY
 
     schema_path = (
-        Path(__file__).parent.parent
-        / "src" / "skill_infra" / "shared" / "evals_schema.py"
+        Path(__file__).parent.parent / "src" / "skill_infra" / "shared" / "evals_schema.py"
     )
     schema_code = schema_path.read_text(encoding="utf-8")
 

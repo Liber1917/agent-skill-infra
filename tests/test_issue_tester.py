@@ -166,8 +166,11 @@ class TestBuildResult:
 class TestGenerateReport:
     def test_all_passed_report(self) -> None:
         result = {
-            "passed": 100, "failed": 0,
-            "test_count": 100, "exit_code": 0, "command": "pytest",
+            "passed": 100,
+            "failed": 0,
+            "test_count": 100,
+            "exit_code": 0,
+            "command": "pytest",
         }
         report = generate_report("https://github.com/x/y", "python", "main", result, 5.0)
         assert "All Passed" in report
@@ -176,8 +179,11 @@ class TestGenerateReport:
 
     def test_failed_report(self) -> None:
         result = {
-            "passed": 90, "failed": 10,
-            "test_count": 100, "exit_code": 1, "command": "npm test",
+            "passed": 90,
+            "failed": 10,
+            "test_count": 100,
+            "exit_code": 1,
+            "command": "npm test",
         }
         report = generate_report("https://github.com/a/b", "npm", "main", result, 3.0)
         assert "Tests Failed" in report

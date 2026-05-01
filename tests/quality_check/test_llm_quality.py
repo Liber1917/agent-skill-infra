@@ -48,19 +48,25 @@ class TestLLMQualityChecker:
 
     def test_parse_valid_response(self) -> None:
         """_parse_response handles valid JSON with 8 dimensions."""
-        response = json.dumps({
-            "dimensions": [
-                {"name": "trigger_precision", "score": 0.9, "findings": ["Clear triggers"]},
-                {"name": "output_completeness", "score": 0.8, "findings": ["Has output format"]},
-                {"name": "rule_specificity", "score": 0.7, "findings": ["Has rules"]},
-                {"name": "error_recovery", "score": 0.6, "findings": ["Some fallback"]},
-                {"name": "example_quality", "score": 0.8, "findings": ["Has examples"]},
-                {"name": "conciseness", "score": 0.7, "findings": ["Compact"]},
-                {"name": "consistency", "score": 0.9, "findings": ["Consistent"]},
-                {"name": "edge_cases", "score": 0.5, "findings": ["Few edge cases"]},
-            ],
-            "overall_score": 0.7375,
-        })
+        response = json.dumps(
+            {
+                "dimensions": [
+                    {"name": "trigger_precision", "score": 0.9, "findings": ["Clear triggers"]},
+                    {
+                        "name": "output_completeness",
+                        "score": 0.8,
+                        "findings": ["Has output format"],
+                    },
+                    {"name": "rule_specificity", "score": 0.7, "findings": ["Has rules"]},
+                    {"name": "error_recovery", "score": 0.6, "findings": ["Some fallback"]},
+                    {"name": "example_quality", "score": 0.8, "findings": ["Has examples"]},
+                    {"name": "conciseness", "score": 0.7, "findings": ["Compact"]},
+                    {"name": "consistency", "score": 0.9, "findings": ["Consistent"]},
+                    {"name": "edge_cases", "score": 0.5, "findings": ["Few edge cases"]},
+                ],
+                "overall_score": 0.7375,
+            }
+        )
 
         result = LLMQualityChecker._parse_response(response)
         assert result.name == "helloandy_8dim_llm"
@@ -86,13 +92,15 @@ class TestLLMQualityChecker:
 
     def test_scores_clamped_to_range(self) -> None:
         """Scores are clamped to 0.0-1.0."""
-        response = json.dumps({
-            "dimensions": [
-                {"name": "a", "score": 1.5, "findings": []},
-                {"name": "b", "score": -0.5, "findings": []},
-            ],
-            "overall_score": 0.5,
-        })
+        response = json.dumps(
+            {
+                "dimensions": [
+                    {"name": "a", "score": 1.5, "findings": []},
+                    {"name": "b", "score": -0.5, "findings": []},
+                ],
+                "overall_score": 0.5,
+            }
+        )
         result = LLMQualityChecker._parse_response(response)
         assert 0.0 <= result.score <= 1.0
 
