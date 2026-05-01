@@ -2,7 +2,7 @@ name: Issue-Triggered Test
 
 on:
   issues:
-    types: [opened]
+    types: [opened, labeled]
 
 permissions:
   issues: write
