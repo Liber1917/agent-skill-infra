@@ -2,12 +2,16 @@ name: Issue-Triggered Test
 
 on:
   issues:
-    types: [opened, labeled]
+    types: [labeled]
 
 permissions:
   issues: write
   contents: read
   models: read
+
+concurrency:
+  group: issue-test-${{ github.event.issue.number }}
+  cancel-in-progress: true
 
 jobs:
   test-on-issue:
