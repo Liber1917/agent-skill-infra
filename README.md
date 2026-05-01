@@ -46,16 +46,16 @@ Score your SKILL.md against helloandy 8-dimension framework.
 
 ```bash
 # Quick quality check
-skill-quality check /path/to/skill/SKILL.md
+skill-quality /path/to/skill/SKILL.md
 
 # JSON output
-skill-quality check /path/to/skill/SKILL.md --output json
+skill-quality /path/to/skill/SKILL.md --output json
 
 # With agent-skill-linter integration
-skill-quality check /path/to/skill/SKILL.md --lint
+skill-quality /path/to/skill/SKILL.md --lint
 
 # With security scan (requires cisco-scanner)
-skill-quality check /path/to/skill/SKILL.md --security
+skill-quality /path/to/skill/SKILL.md --security
 ```
 
 ### `skill-version` — Version Awareness

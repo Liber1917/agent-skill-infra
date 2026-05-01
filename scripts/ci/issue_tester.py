@@ -196,7 +196,7 @@ def run_tests(repo_dir: Path, project_type: str, custom_cmd: str = "") -> dict[s
                 error_type="unknown_type",
             )
         rc, stdout, stderr, err = _run(
-            ["uv", "run", "skill-quality", "check", str(skill_md), "--output", "json"],
+            ["uv", "run", "skill-quality", str(skill_md), "--output", "json"],
             TIMEOUT_TEST,
         )
         return _build_result(rc, stdout, stderr, "skill-quality check", error_type=err)
