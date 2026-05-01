@@ -113,9 +113,7 @@ class TestSnapshotJudger:
             # Store baseline with a timestamp
             judger.judge("Output at 2024-01-01T12:00:00Z", {})
             # Same content, different timestamp — should match after normalization
-            passed, _score, reason = judger.judge(
-                "Output at 2025-06-15T08:30:00Z", {}
-            )
+            passed, _score, reason = judger.judge("Output at 2025-06-15T08:30:00Z", {})
 
             assert passed is True, f"Normalizers should strip timestamps. Got: {reason}"
             assert "snapshot matches" in reason

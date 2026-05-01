@@ -23,12 +23,10 @@ from urllib.request import Request, urlopen
 # Constants
 # ---------------------------------------------------------------------------
 
-REPO_URL_RE = re.compile(
-    r"https://github\.com/([^/\s]+)/([^/\s]+?)(?:\.git)?(?:\s|$)"
-)
+REPO_URL_RE = re.compile(r"https://github\.com/([^/\s]+)/([^/\s]+?)(?:\.git)?(?:\s|$)")
 
 TIMEOUT_INSTALL = 180  # seconds for dependency install
-TIMEOUT_TEST = 300     # seconds for test execution
+TIMEOUT_TEST = 300  # seconds for test execution
 
 
 # ---------------------------------------------------------------------------
@@ -140,9 +138,7 @@ def run_tests(repo_dir: Path, project_type: str, custom_cmd: str = "") -> dict[s
     env["PYTHONUNBUFFERED"] = "1"
     env["NPM_CONFIG_YES"] = "true"
 
-    def _run(
-        cmd: list[str], timeout: int, cwd: Path | None = None
-    ) -> tuple[int, str, str, str]:
+    def _run(cmd: list[str], timeout: int, cwd: Path | None = None) -> tuple[int, str, str, str]:
         try:
             result = subprocess.run(
                 cmd,
@@ -192,7 +188,10 @@ def run_tests(repo_dir: Path, project_type: str, custom_cmd: str = "") -> dict[s
         skill_md = repo_dir / "SKILL.md"
         if not skill_md.exists():
             return _build_result(
-                -1, "", "SKILL.md not found", "skill-quality",
+                -1,
+                "",
+                "SKILL.md not found",
+                "skill-quality",
                 error_type="unknown_type",
             )
         # Prefer GitHub Models (free) when available, else keyword fallback
@@ -219,7 +218,10 @@ def run_tests(repo_dir: Path, project_type: str, custom_cmd: str = "") -> dict[s
         }
 
     return _build_result(
-        -1, "", f"Unknown project type: {project_type}", "unknown",
+        -1,
+        "",
+        f"Unknown project type: {project_type}",
+        "unknown",
         error_type="unknown_type",
     )
 
@@ -240,8 +242,12 @@ def _count_config_files(repo_dir: Path) -> dict[str, int]:
 
 
 def _build_result(
-    rc: int, stdout: str, stderr: str, command: str,
-    duration_ms: int = 0, error_type: str = "",
+    rc: int,
+    stdout: str,
+    stderr: str,
+    command: str,
+    duration_ms: int = 0,
+    error_type: str = "",
 ) -> dict[str, Any]:
     """Build a unified result dict from raw test output."""
     # Try to extract test counts from pytest/npm/bun output
@@ -251,6 +257,7 @@ def _build_result(
     if '"overall_score"' in stdout:
         try:
             import json as _json
+
             data = _json.loads(stdout)
             score = data.get("overall_score", 0)
             # Treat quality score as: pass if >= 0.5
@@ -371,104 +378,121 @@ def generate_report(
     if exit_code == -1:
         error_type = result.get("error_type", "")
         if error_type == "unknown_type":
-            lines.extend([
-                "### Result: Project Type Unknown",
-                "",
-                f"Could not detect project type for `{project_type}`.",
-                "Supported types: Python, Node/npm, Bun, Config-driven.",
-            ])
+            lines.extend(
+                [
+                    "### Result: Project Type Unknown",
+                    "",
+                    f"Could not detect project type for `{project_type}`.",
+                    "Supported types: Python, Node/npm, Bun, Config-driven.",
+                ]
+            )
         elif error_type == "clone_failed":
-            lines.extend([
-                "### Result: Clone Failed",
-                "",
-                f"Could not clone {repo_url}.",
-            ])
+            lines.extend(
+                [
+                    "### Result: Clone Failed",
+                    "",
+                    f"Could not clone {repo_url}.",
+                ]
+            )
         else:
-            lines.extend([
-                "### Result: Timeout",
-                "",
-                f"Test execution exceeded the {TIMEOUT_TEST}s limit.",
-            ])
+            lines.extend(
+                [
+                    "### Result: Timeout",
+                    "",
+                    f"Test execution exceeded the {TIMEOUT_TEST}s limit.",
+                ]
+            )
     elif exit_code == -2:
-        lines.extend([
-            "### Result: Tool Missing",
-            "",
-            f"Required tool not found: {result.get('stderr', 'unknown')}",
-        ])
+        lines.extend(
+            [
+                "### Result: Tool Missing",
+                "",
+                f"Required tool not found: {result.get('stderr', 'unknown')}",
+            ]
+        )
     elif exit_code != 0:
-        lines.extend([
-            "### Result: Tests Failed",
-            "",
-            "| Passed | Failed | Total | Rate |",
-            "|--------|--------|-------|------|",
-            f"| {passed} | {failed} | {total} | {pass_rate} |",
-        ])
+        lines.extend(
+            [
+                "### Result: Tests Failed",
+                "",
+                "| Passed | Failed | Total | Rate |",
+                "|--------|--------|-------|------|",
+                f"| {passed} | {failed} | {total} | {pass_rate} |",
+            ]
+        )
     elif quality_score is not None:
-        lines.extend([
-            "### Result: Skill Quality Assessment",
-            "",
-            f"Quality score: **{quality_score:.0%}** ({quality_score:.2f}/1.00)",
-        ])
+        lines.extend(
+            [
+                "### Result: Skill Quality Assessment",
+                "",
+                f"Quality score: **{quality_score:.0%}** ({quality_score:.2f}/1.00)",
+            ]
+        )
     else:
         if quality_score is not None:
             label = (
-                "Good" if quality_score >= 0.7
-                else "Fair" if quality_score >= 0.5
-                else "Needs Work"
+                "Good" if quality_score >= 0.7 else "Fair" if quality_score >= 0.5 else "Needs Work"
             )
-            lines.extend([
-                f"### Result: Skill Quality {label}",
-                "",
-                f"Quality score: **{quality_score:.0%}** ({quality_score:.2f}/1.00)",
-            ])
+            lines.extend(
+                [
+                    f"### Result: Skill Quality {label}",
+                    "",
+                    f"Quality score: **{quality_score:.0%}** ({quality_score:.2f}/1.00)",
+                ]
+            )
         else:
-            lines.extend([
-                "### Result: All Passed",
-                "",
-                "| Passed | Total | Rate |",
-                "|--------|-------|------|",
-                f"| {passed} | {total} | {pass_rate} |",
-            ])
+            lines.extend(
+                [
+                    "### Result: All Passed",
+                    "",
+                    "| Passed | Total | Rate |",
+                    "|--------|-------|------|",
+                    f"| {passed} | {total} | {pass_rate} |",
+                ]
+            )
 
     # Add improvements section if present
-    improvements = [
-        f for f in result.get("findings", [])
-        if "→" in str(f)
-    ]
+    improvements = [f for f in result.get("findings", []) if "→" in str(f)]
     if not improvements:
         # Try parsing from stdout for JSON-based checkers
         stdout = result.get("stdout", "")
         improvements = [ln for ln in stdout.split("\n") if "→" in ln]
     if improvements:
-        lines.extend([
-            "",
-            "### Suggestions for Improvement",
-            "",
-        ])
+        lines.extend(
+            [
+                "",
+                "### Suggestions for Improvement",
+                "",
+            ]
+        )
         for i, imp in enumerate(improvements[:8]):  # top 8
-            lines.append(f"{i+1}. {imp.split('→', 1)[-1].strip()}")
+            lines.append(f"{i + 1}. {imp.split('→', 1)[-1].strip()}")
         lines.append("")
 
     # Add stdout summary if tests ran
     stdout = result.get("stdout", "")
     if stdout and project_type != "config":
-        lines.extend([
-            "",
-            "<details>",
-            "<summary>Test output (last 4000 chars)</summary>",
-            "",
-            "```",
-            stdout[-2000:],
-            "```",
-            "",
-            "</details>",
-        ])
+        lines.extend(
+            [
+                "",
+                "<details>",
+                "<summary>Test output (last 4000 chars)</summary>",
+                "",
+                "```",
+                stdout[-2000:],
+                "```",
+                "",
+                "</details>",
+            ]
+        )
 
-    lines.extend([
-        "",
-        "---",
-        "*Auto-generated by [agent-skill-infra](https://github.com/Liber1917/agent-skill-infra)*",
-    ])
+    lines.extend(
+        [
+            "",
+            "---",
+            "*Auto-generated by [agent-skill-infra](https://github.com/Liber1917/agent-skill-infra)*",
+        ]
+    )
 
     return "\n".join(lines)
 

@@ -80,9 +80,7 @@ class GitHubModelQualityChecker:
             response = self._call_api(parsed)
             return self._parse_response(response)
         except Exception as exc:
-            return self._fallback_check(
-                parsed, f"GitHub Models API error: {exc}"
-            )
+            return self._fallback_check(parsed, f"GitHub Models API error: {exc}")
 
     def is_available(self) -> bool:
         return bool(self._token)
@@ -97,7 +95,9 @@ class GitHubModelQualityChecker:
         desc = parsed.meta.description.strip() or parsed.meta.name
         body = parsed.raw_body[:8000]  # gpt-4o-mini has large context
         user_message = _USER_TEMPLATE.format(
-            name=parsed.meta.name, description=desc, body=body,
+            name=parsed.meta.name,
+            description=desc,
+            body=body,
         )
 
         with httpx.Client(timeout=45.0) as client:
@@ -125,11 +125,14 @@ class GitHubModelQualityChecker:
             choices = data.get("choices", [])
             if choices:
                 return choices[0]["message"]["content"]
-            return json.dumps({
-                "dimensions": [{"name": "error", "score": 0.5,
-                                "findings": ["Empty response from API"]}],
-                "overall_score": 0.5,
-            })
+            return json.dumps(
+                {
+                    "dimensions": [
+                        {"name": "error", "score": 0.5, "findings": ["Empty response from API"]}
+                    ],
+                    "overall_score": 0.5,
+                }
+            )
 
     @classmethod
     def _parse_response(cls, response: str) -> DimensionScore:
@@ -143,7 +146,8 @@ class GitHubModelQualityChecker:
             data = json.loads(text)
         except json.JSONDecodeError:
             return DimensionScore(
-                name=cls._DIM_NAME, score=0.5,
+                name=cls._DIM_NAME,
+                score=0.5,
                 findings=[f"API returned invalid JSON: {text[:100]}"],
             )
 
@@ -167,7 +171,8 @@ class GitHubModelQualityChecker:
             findings.insert(0, f"Summary: {summary}")
 
         return DimensionScore(
-            name=cls._DIM_NAME, score=overall,
+            name=cls._DIM_NAME,
+            score=overall,
             findings=findings or [f"Overall: {overall:.0%}"],
         )
 

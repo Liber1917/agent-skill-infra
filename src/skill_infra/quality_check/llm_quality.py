@@ -128,10 +128,12 @@ class LLMQualityChecker:
             for block in data.get("content", []):
                 if block.get("type") == "text":
                     return block["text"]
-            return json.dumps({
-                "dimensions": [{"name": "error", "score": 0.5, "findings": ["Empty response"]}],
-                "overall_score": 0.5,
-            })
+            return json.dumps(
+                {
+                    "dimensions": [{"name": "error", "score": 0.5, "findings": ["Empty response"]}],
+                    "overall_score": 0.5,
+                }
+            )
 
     @classmethod
     def _parse_response(cls, response: str) -> DimensionScore:

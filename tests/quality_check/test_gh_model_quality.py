@@ -35,19 +35,21 @@ class TestGitHubModelQualityChecker:
         assert checker.is_available() is True
 
     def test_parse_valid_response(self) -> None:
-        response = json.dumps({
-            "dimensions": [
-                {"name": "trigger_precision", "score": 0.9, "findings": ["Clear triggers"]},
-                {"name": "output_completeness", "score": 0.8, "findings": ["Has output"]},
-                {"name": "rule_specificity", "score": 0.7, "findings": ["Has rules"]},
-                {"name": "error_recovery", "score": 0.6, "findings": ["Fallback exists"]},
-                {"name": "example_quality", "score": 0.8, "findings": ["Has examples"]},
-                {"name": "conciseness", "score": 0.7, "findings": ["Compact"]},
-                {"name": "consistency", "score": 0.9, "findings": ["Consistent"]},
-                {"name": "edge_cases", "score": 0.5, "findings": ["Few edge cases"]},
-            ],
-            "overall_score": 0.7375,
-        })
+        response = json.dumps(
+            {
+                "dimensions": [
+                    {"name": "trigger_precision", "score": 0.9, "findings": ["Clear triggers"]},
+                    {"name": "output_completeness", "score": 0.8, "findings": ["Has output"]},
+                    {"name": "rule_specificity", "score": 0.7, "findings": ["Has rules"]},
+                    {"name": "error_recovery", "score": 0.6, "findings": ["Fallback exists"]},
+                    {"name": "example_quality", "score": 0.8, "findings": ["Has examples"]},
+                    {"name": "conciseness", "score": 0.7, "findings": ["Compact"]},
+                    {"name": "consistency", "score": 0.9, "findings": ["Consistent"]},
+                    {"name": "edge_cases", "score": 0.5, "findings": ["Few edge cases"]},
+                ],
+                "overall_score": 0.7375,
+            }
+        )
         result = GitHubModelQualityChecker._parse_response(response)
         assert abs(result.score - 0.7375) < 0.01
         assert len(result.findings) == 8
@@ -63,6 +65,7 @@ class TestGitHubModelQualityChecker:
 
     def test_env_token_detection(self) -> None:
         import os
+
         os.environ["GITHUB_TOKEN"] = "test-token"
         try:
             checker = GitHubModelQualityChecker()
