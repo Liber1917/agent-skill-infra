@@ -1,0 +1,39 @@
+name: Request Skill Repo Test
+description: Submit a repository for automated testing by agent-skill-infra
+title: "[Test] "
+labels: ["test-request"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Submit a GitHub repository for automated testing.
+        We'll clone it, detect the project type, run its test suite, and post a report.
+
+  - type: input
+    id: repo_url
+    attributes:
+      label: Repository URL
+      description: Full GitHub URL (e.g., https://github.com/owner/repo)
+      placeholder: https://github.com/
+    validations:
+      required: true
+
+  - type: input
+    id: branch
+    attributes:
+      label: Branch (optional)
+      description: Which branch to test? Defaults to the repo's default branch.
+      placeholder: main
+
+  - type: input
+    id: test_command
+    attributes:
+      label: Custom test command (optional)
+      description: Override auto-detection with a specific command (e.g., `npm test`, `pytest tests/`)
+      placeholder: npm test
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: Additional notes (optional)
+      description: Anything else we should know about this repo?
