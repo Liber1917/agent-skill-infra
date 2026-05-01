@@ -42,7 +42,8 @@ src = ["src"]
 select = ["E", "F", "I", "N", "UP", "B", "SIM", "RUF"]
 
 [tool.ruff.lint.per-file-ignores]
-"src/skill_infra/test_runner/cli.py" = ["B008"]  # Typer requires function-call defaults
+"src/skill_infra/test_runner/cli.py" = ["B008"]
+"src/skill_infra/quality_check/cli.py" = ["B008"]
 
 [tool.ruff.lint.isort]
 known-first-party = ["skill_infra"]

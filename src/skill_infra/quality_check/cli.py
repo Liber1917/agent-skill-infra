@@ -20,7 +20,7 @@ app = typer.Typer(
 
 @app.command()
 def check(
-    skill_path: Path = typer.Argument(  # noqa: B008
+    skill_path: Path = typer.Argument(
         default=None,
         help="Path to the SKILL.md file or skill directory.",
     ),
@@ -34,6 +34,11 @@ def check(
         False,
         "--security",
         help="Include security scan (requires cisco-scanner).",
+    ),
+    lint: bool = typer.Option(
+        False,
+        "--lint",
+        help="Include agent-skill-linter check (requires npx).",
     ),
 ) -> None:
     """Run quality checks on a SKILL.md file."""
@@ -64,6 +69,25 @@ def check(
 
         sec_result = SecurityIntegration().run(str(target))
         dimensions.append(sec_result)
+
+    # Linter integration (optional)
+    if lint:
+        from skill_infra.quality_check.linter_adapter import LinterAdapter
+        from skill_infra.quality_check.scorecard import DimensionScore
+
+        adapter = LinterAdapter()
+        linter_result = adapter.run(target)
+        lint_score = 1.0 if linter_result.passed else 0.5
+        lint_findings = [f"[{v.severity}] {v.rule}: {v.message}" for v in linter_result.violations]
+        if not lint_findings:
+            lint_findings.append("No linter violations found.")
+        dimensions.append(
+            DimensionScore(
+                name="agent-skill-linter",
+                score=lint_score,
+                findings=lint_findings,
+            )
+        )
 
     report = QualityReport.from_dimensions(
         skill_name=parsed.meta.name,
