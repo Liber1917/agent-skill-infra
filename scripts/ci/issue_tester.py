@@ -136,7 +136,9 @@ def run_tests(repo_dir: Path, project_type: str, custom_cmd: str = "") -> dict[s
     env["PYTHONUNBUFFERED"] = "1"
     env["NPM_CONFIG_YES"] = "true"
 
-    def _run(cmd: list[str], timeout: int, cwd: Path | None = None) -> tuple[int, str, str]:
+    def _run(
+        cmd: list[str], timeout: int, cwd: Path | None = None
+    ) -> tuple[int, str, str, str]:
         try:
             result = subprocess.run(
                 cmd,
@@ -146,40 +148,40 @@ def run_tests(repo_dir: Path, project_type: str, custom_cmd: str = "") -> dict[s
                 cwd=cwd or repo_dir,
                 env=env,
             )
-            return result.returncode, result.stdout, result.stderr
+            return result.returncode, result.stdout, result.stderr, ""
         except subprocess.TimeoutExpired:
-            return -1, "", f"Timeout after {timeout}s"
+            return -1, "", f"Timeout after {timeout}s", "timeout"
         except FileNotFoundError as exc:
-            return -2, "", str(exc)
+            return -2, "", str(exc), "tool_missing"
 
     if custom_cmd:
-        rc, stdout, stderr = _run(custom_cmd.split(), TIMEOUT_TEST)
-        return _build_result(rc, stdout, stderr, custom_cmd)
+        rc, stdout, stderr, err = _run(custom_cmd.split(), TIMEOUT_TEST)
+        return _build_result(rc, stdout, stderr, custom_cmd, error_type=err)
 
     if project_type == "bun":
         _run(["bun", "install"], TIMEOUT_INSTALL)
-        rc, stdout, stderr = _run(["bun", "test"], TIMEOUT_TEST)
-        return _build_result(rc, stdout, stderr, "bun test")
+        rc, stdout, stderr, err = _run(["bun", "test"], TIMEOUT_TEST)
+        return _build_result(rc, stdout, stderr, "bun test", error_type=err)
 
     if project_type == "npm":
         _run(["npm", "install", "--no-audit", "--no-fund"], TIMEOUT_INSTALL)
-        rc, stdout, stderr = _run(["npm", "test"], TIMEOUT_TEST)
-        return _build_result(rc, stdout, stderr, "npm test")
+        rc, stdout, stderr, err = _run(["npm", "test"], TIMEOUT_TEST)
+        return _build_result(rc, stdout, stderr, "npm test", error_type=err)
 
     if project_type == "python":
         # Try uv first, fall back to pip
-        uv_ok, _, _ = _run(["uv", "sync"], 30, cwd=repo_dir)
+        uv_ok, _, _, _ = _run(["uv", "sync"], 30, cwd=repo_dir)
         if uv_ok == 0:
-            rc, stdout, stderr = _run(
+            rc, stdout, stderr, err = _run(
                 ["uv", "run", "pytest", "-q", "--tb=line"], TIMEOUT_TEST, cwd=repo_dir
             )
-            return _build_result(rc, stdout, stderr, "uv run pytest")
+            return _build_result(rc, stdout, stderr, "uv run pytest", error_type=err)
         else:
             _run([sys.executable, "-m", "pip", "install", "-e", ".[dev]"], TIMEOUT_INSTALL)
-            rc, stdout, stderr = _run(
+            rc, stdout, stderr, err = _run(
                 [sys.executable, "-m", "pytest", "-q", "--tb=line"], TIMEOUT_TEST
             )
-            return _build_result(rc, stdout, stderr, "pytest")
+            return _build_result(rc, stdout, stderr, "pytest", error_type=err)
 
     if project_type == "config":
         # Count and validate configuration files
@@ -196,7 +198,10 @@ def run_tests(repo_dir: Path, project_type: str, custom_cmd: str = "") -> dict[s
             "duration_ms": 0,
         }
 
-    return _build_result(-1, "", f"Unknown project type: {project_type}", "unknown")
+    return _build_result(
+        -1, "", f"Unknown project type: {project_type}", "unknown",
+        error_type="unknown_type",
+    )
 
 
 def _count_config_files(repo_dir: Path) -> dict[str, int]:
@@ -215,7 +220,8 @@ def _count_config_files(repo_dir: Path) -> dict[str, int]:
 
 
 def _build_result(
-    rc: int, stdout: str, stderr: str, command: str, duration_ms: int = 0
+    rc: int, stdout: str, stderr: str, command: str,
+    duration_ms: int = 0, error_type: str = "",
 ) -> dict[str, Any]:
     """Build a unified result dict from raw test output."""
     # Try to extract test counts from pytest/npm/bun output
@@ -257,9 +263,10 @@ def _build_result(
         "passed": passed,
         "failed": failed,
         "errors": 1 if rc not in (0, -1, -2) else 0,
-        "stdout": stdout[-4000:] if len(stdout) > 4000 else stdout,  # GitHub comment limit
+        "stdout": stdout[-4000:] if len(stdout) > 4000 else stdout,
         "stderr": stderr[-2000:] if len(stderr) > 2000 else stderr,
         "duration_ms": duration_ms,
+        "error_type": error_type,
     }
 
 
@@ -298,11 +305,26 @@ def generate_report(
     ]
 
     if exit_code == -1:
-        lines.extend([
-            "### Result: Timeout",
-            "",
-            f"Test execution exceeded the {TIMEOUT_TEST}s limit.",
-        ])
+        error_type = result.get("error_type", "")
+        if error_type == "unknown_type":
+            lines.extend([
+                "### Result: Project Type Unknown",
+                "",
+                f"Could not detect project type for `{project_type}`.",
+                "Supported types: Python, Node/npm, Bun, Config-driven.",
+            ])
+        elif error_type == "clone_failed":
+            lines.extend([
+                "### Result: Clone Failed",
+                "",
+                f"Could not clone {repo_url}.",
+            ])
+        else:
+            lines.extend([
+                "### Result: Timeout",
+                "",
+                f"Test execution exceeded the {TIMEOUT_TEST}s limit.",
+            ])
     elif exit_code == -2:
         lines.extend([
             "### Result: Tool Missing",
