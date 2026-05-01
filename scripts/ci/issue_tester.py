@@ -256,7 +256,7 @@ def _build_result(
             total = 1
             return {
                 "command": command,
-                "exit_code": 0 if score >= 0.5 else 1,
+                "exit_code": 0,  # quality score carries pass/fail semantics
                 "test_count": 1,
                 "passed": passed,
                 "failed": 1 - passed,
@@ -396,13 +396,25 @@ def generate_report(
             f"Quality score: **{quality_score:.0%}** ({quality_score:.2f}/1.00)",
         ])
     else:
-        lines.extend([
-            "### Result: All Passed",
-            "",
-            "| Passed | Total | Rate |",
-            "|--------|-------|------|",
-            f"| {passed} | {total} | {pass_rate} |",
-        ])
+        if quality_score is not None:
+            label = (
+                "Good" if quality_score >= 0.7
+                else "Fair" if quality_score >= 0.5
+                else "Needs Work"
+            )
+            lines.extend([
+                f"### Result: Skill Quality {label}",
+                "",
+                f"Quality score: **{quality_score:.0%}** ({quality_score:.2f}/1.00)",
+            ])
+        else:
+            lines.extend([
+                "### Result: All Passed",
+                "",
+                "| Passed | Total | Rate |",
+                "|--------|-------|------|",
+                f"| {passed} | {total} | {pass_rate} |",
+            ])
 
     # Add stdout summary if tests ran
     stdout = result.get("stdout", "")
