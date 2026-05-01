@@ -36,4 +36,5 @@ jobs:
           ISSUE_BODY: ${{ github.event.issue.body }}
           GITHUB_REPOSITORY: ${{ github.repository }}
           GH_TOKEN: ${{ github.token }}
+          GITHUB_TOKEN: ${{ github.token }}
         timeout-minutes: 10
