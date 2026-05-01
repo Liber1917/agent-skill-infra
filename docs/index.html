@@ -3,13 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>agent-skill-infra — 交互式演示</title>
+<title>agent-skill-infra — 为 Agent Skill 提供质量基础设施</title>
+<meta name="description" content="测试、评分、版本管理 —— 不是市场，不是平台。为 agentskills.io 生态构建的质量工具。">
 <style>
 :root {
   --bg: #0a0e14; --card: #12171f; --border: #1e293b;
   --text: #c9d1d9; --muted: #64748b; --accent: #58a6ff;
   --green: #3fb950; --orange: #d2991d; --red: #f85149;
-  --purple: #a78bfa; --pink: #f472b6;
+  --purple: #a78bfa; --pink: #f472b6; --teal: #2dd4bf;
   --radius: 10px;
   --font: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
   --mono: "SF Mono", "Fira Code", "Cascadia Code", monospace;
@@ -17,50 +18,77 @@
 * { margin:0; padding:0; box-sizing:border-box; }
 body { background:var(--bg); color:var(--text); font-family:var(--font); line-height:1.6; }
 
-/* Hero */
-.hero {
-  text-align:center; padding:3rem 2rem 2rem;
-  background: linear-gradient(180deg, #12171f 0%, #0a0e14 100%);
-  border-bottom: 1px solid var(--border);
+/* ── Navigation ── */
+nav {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:.8rem 2rem; border-bottom:1px solid var(--border);
+  background:rgba(10,14,20,0.92); backdrop-filter:blur(12px);
+  position:sticky; top:0; z-index:10;
 }
-.hero h1 { font-size:2rem; font-weight:800; margin-bottom:.5rem; }
-.hero h1 span { color:var(--accent); }
-.hero p { color:var(--muted); font-size:.95rem; max-width:600px; margin:0 auto 1.5rem; }
-.badges { display:flex; justify-content:center; gap:1rem; flex-wrap:wrap; }
-.badge {
-  padding:.35rem .8rem; border-radius:20px; font-size:.78rem; font-weight:600;
-  border:1px solid var(--border); background:var(--card);
-}
-.badge.py { color:var(--accent); border-color:var(--accent); }
-.badge.cli { color:var(--green); border-color:var(--green); }
-.badge.oss { color:var(--purple); border-color:var(--purple); }
+nav .logo { font-weight:700; font-size:.95rem; }
+nav .logo span { color:var(--accent); }
+nav .links { display:flex; gap:1.2rem; align-items:center; }
+nav .links a { color:var(--muted); text-decoration:none; font-size:.82rem; transition:color .2s; }
+nav .links a:hover { color:var(--text); }
+nav .links .gh { color:var(--accent); font-weight:600; }
 
-/* Tabs */
-.tabs { display:flex; justify-content:center; gap:0; padding:0 1rem; }
+/* ── Hero ── */
+.hero {
+  text-align:center; padding:5rem 2rem 3rem;
+  background: linear-gradient(180deg, #0d1520 0%, #0a0e14 100%);
+}
+.hero .overline {
+  font-size:.75rem; text-transform:uppercase; letter-spacing:2px;
+  color:var(--accent); margin-bottom:1rem; font-weight:600;
+}
+.hero h1 { font-size:2.4rem; font-weight:800; margin-bottom:1rem; line-height:1.2; }
+.hero h1 em { font-style:normal; color:var(--accent); }
+.hero .sub {
+  color:var(--muted); font-size:.95rem; max-width:640px; margin:0 auto 1.8rem;
+  line-height:1.7;
+}
+.hero .cta { display:flex; gap:.8rem; justify-content:center; flex-wrap:wrap; }
+.hero .cta a {
+  display:inline-flex; align-items:center; gap:.5rem;
+  padding:.55rem 1.4rem; border-radius:8px; font-size:.85rem; font-weight:600;
+  text-decoration:none; transition:all .2s;
+}
+.cta-primary { background:var(--accent); color:#fff; }
+.cta-primary:hover { background:#4c9ce6; }
+.cta-gh { background:var(--card); color:var(--text); border:1px solid var(--border); }
+.cta-gh:hover { background:#1c2333; }
+
+/* ── Section ── */
+.section { max-width:1000px; margin:0 auto; padding:3rem 2rem; }
+.section h2 { font-size:1.4rem; margin-bottom:.5rem; }
+.section h2 span { color:var(--accent); }
+.section > p { color:var(--muted); font-size:.88rem; margin-bottom:2rem; }
+
+/* ── Cards ── */
+.stat-row { display:grid; grid-template-columns:repeat(auto-fit, minmax(170px, 1fr)); gap:1rem; margin-bottom:2rem; }
+.stat-card {
+  background:var(--card); border:1px solid var(--border); border-radius:var(--radius);
+  padding:1.2rem; text-align:center;
+}
+.stat-card .icon { font-size:1.6rem; margin-bottom:.3rem; }
+.stat-card .num { font-size:1.5rem; font-weight:700; }
+.stat-card .label { font-size:.76rem; color:var(--muted); margin-top:.2rem; }
+
+/* ── Tabs ── */
+.tabs { display:flex; justify-content:center; gap:0; padding:0 1rem; margin-bottom:0; }
 .tab-btn {
-  padding:.7rem 1.4rem; border:1px solid var(--border); border-bottom:none;
+  padding:.7rem 1.5rem; border:1px solid var(--border); border-bottom:none;
   background:var(--card); color:var(--muted); cursor:pointer;
-  font-size:.85rem; font-weight:500; transition:all .2s;
+  font-size:.84rem; font-weight:500; transition:all .2s;
 }
 .tab-btn:first-child { border-radius: var(--radius) 0 0 0; }
 .tab-btn:last-child { border-radius: 0 var(--radius) 0 0; }
 .tab-btn:hover { color:var(--text); }
 .tab-btn.active { background:var(--bg); color:var(--accent); border-bottom:2px solid var(--accent); font-weight:600; }
-
-.tab-panel { display:none; padding:2rem; max-width:1000px; margin:0 auto; }
+.tab-panel { display:none; padding:2rem; }
 .tab-panel.active { display:block; }
 
-/* Cards */
-.stat-row { display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:1rem; margin-bottom:1.8rem; }
-.stat-card { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:1rem 1.2rem; text-align:center; }
-.stat-card .icon { font-size:1.8rem; margin-bottom:.3rem; }
-.stat-card .num { font-size:1.6rem; font-weight:700; }
-.stat-card .label { font-size:.76rem; color:var(--muted); margin-top:.2rem; }
-.c-accent .num, .c-accent .icon { color:var(--accent); }
-.c-green .num, .c-green .icon { color:var(--green); }
-.c-purple .num, .c-purple .icon { color:var(--purple); }
-
-/* CLI Demo */
+/* ── CLI Demo ── */
 .cli-demo {
   background:var(--card); border:1px solid var(--border); border-radius:var(--radius);
   overflow:hidden; margin:1rem 0;
@@ -70,13 +98,13 @@ body { background:var(--bg); color:var(--text); font-family:var(--font); line-he
   border-bottom:1px solid var(--border);
 }
 .cli-dot { width:10px; height:10px; border-radius:50%; }
-.cli-dot.red { background:#f85149; }
-.cli-dot.yellow { background:#d2991d; }
-.cli-dot.green { background:#3fb950; }
-.cli-prompt { color:var(--muted); font-family:var(--mono); font-size:.78rem; flex:1; margin-left:.5rem; }
-.cli-body { padding:1rem; }
+.cli-dot.red { background:var(--red); }
+.cli-dot.yellow { background:var(--orange); }
+.cli-dot.green { background:var(--green); }
+.cli-prompt { color:var(--muted); font-family:var(--mono); font-size:.76rem; flex:1; margin-left:.5rem; }
+.cli-body { padding:1rem 1.2rem; }
 .cli-body pre {
-  font-family:var(--mono); font-size:.8rem; line-height:1.5; color:var(--text);
+  font-family:var(--mono); font-size:.78rem; line-height:1.6; color:var(--text);
   overflow-x:auto; white-space:pre-wrap;
 }
 .cli-body .cmd { color:var(--green); }
@@ -85,273 +113,187 @@ body { background:var(--bg); color:var(--text); font-family:var(--font); line-he
 .cli-body .warn { color:var(--orange); }
 .cli-body .err { color:var(--red); }
 .cli-body .pass { color:var(--green); }
+.cli-body .tip { color:var(--teal); }
 
-/* Try buttons */
-.try-row { display:flex; gap:.6rem; margin:.6rem 0; flex-wrap:wrap; }
-.try-btn {
-  padding:.4rem 1rem; border-radius:6px; border:1px solid var(--border);
-  background:var(--card); color:var(--accent); cursor:pointer;
-  font-size:.78rem; font-family:var(--mono); transition:all .2s;
-}
-.try-btn:hover { background:#1c2333; border-color:var(--accent); }
-.try-btn.active { background:#1c2838; border-color:var(--accent); color:var(--green); }
-
-/* Workflow */
-.wf-steps { display:grid; grid-template-columns:repeat(4, 1fr); gap:1rem; margin:1.5rem 0; }
-.wf-step {
-  background:var(--card); border:1px solid var(--border); border-radius:var(--radius);
-  padding:1.2rem; text-align:center; position:relative;
-}
-.wf-step .step-num {
-  width:28px; height:28px; border-radius:50%; background:var(--accent);
-  color:#fff; font-weight:700; font-size:.82rem; display:flex;
-  align-items:center; justify-content:center; margin:0 auto .6rem;
-}
-.wf-step h4 { font-size:.85rem; margin-bottom:.3rem; }
-.wf-step p { font-size:.75rem; color:var(--muted); }
-.wf-arrow { position:absolute; right:-20px; top:50%; color:var(--muted); font-size:1.2rem; transform:translateY(-50%); }
-
-/* Table */
+/* ── Table ── */
 .tbl { width:100%; border-collapse:collapse; font-size:.85rem; margin:1rem 0; }
 .tbl th { text-align:left; padding:.6rem .8rem; background:var(--card); border-bottom:2px solid var(--border); color:var(--accent); font-size:.78rem; text-transform:uppercase; letter-spacing:.5px; }
 .tbl td { padding:.55rem .8rem; border-bottom:1px solid var(--border); }
 .tbl tr:hover td { background:#161b22; }
 
-/* JSON view */
-.json-out {
-  background:#0d1117; border:1px solid var(--border); border-radius:var(--radius);
-  padding:1rem; font-family:var(--mono); font-size:.78rem; line-height:1.6;
-  overflow-x:auto; max-height:420px; overflow-y:auto;
+/* ── Philosophy ── */
+.phil-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:1rem; }
+.phil-card {
+  background:linear-gradient(135deg, var(--card), #161d2a);
+  border:1px solid var(--border); border-radius:var(--radius); padding:1.4rem;
 }
+.phil-card h4 { font-size:.9rem; margin-bottom:.4rem; }
+.phil-card h4 .em { font-size:1.2rem; margin-right:.3rem; }
+.phil-card p { font-size:.8rem; color:var(--muted); line-height:1.6; }
 
+/* ── Footer ── */
+footer {
+  text-align:center; padding:3rem 1rem; color:var(--muted); font-size:.78rem;
+  border-top:1px solid var(--border); margin-top:2rem;
+}
+footer a { color:var(--accent); text-decoration:none; }
+footer .flinks { display:flex; gap:1.2rem; justify-content:center; margin-bottom:.8rem; }
+
+/* ── Responsive ── */
 @media (max-width:768px) {
-  .wf-steps { grid-template-columns:1fr 1fr; }
-  .hero h1 { font-size:1.4rem; }
+  .hero h1 { font-size:1.6rem; }
+  .hero { padding:3rem 1.5rem 2rem; }
+  nav { padding:.6rem 1rem; }
+  .section { padding:2rem 1rem; }
 }
 </style>
 </head>
 <body>
 
-<div class="hero">
-  <h1>🧩 <span>agent-skill-infra</span></h1>
-  <p>从开发到运维全流程覆盖 — 质量检查 · 行为测试 · 版本感知。别人只做安装前扫描，我们覆盖整个生命周期。</p>
-  <div class="badges">
-    <span class="badge py">Python 3.12 + uv</span>
-    <span class="badge cli">3 CLI 工具</span>
-    <span class="badge oss">MIT License</span>
-    <span class="badge">162 Tests</span>
-    <span class="badge">v0.2.0</span>
+<!-- ═══ NAV ═══ -->
+<nav>
+  <div class="logo">🧩 <span>agent-skill-infra</span></div>
+  <div class="links">
+    <a href="https://github.com/Liber1917/agent-skill-infra" class="gh">GitHub</a>
+    <a href="https://pypi.org/project/agent-skill-infra/">PyPI</a>
+    <a href="https://agentskills.io/specification">Spec</a>
   </div>
-</div>
-
-<nav class="tabs">
-  <button class="tab-btn active" onclick="switchTab('workflow')">🔄 完整工作流</button>
-  <button class="tab-btn" onclick="switchTab('quality')">✅ skill-quality</button>
-  <button class="tab-btn" onclick="switchTab('test')">🧪 skill-test</button>
-  <button class="tab-btn" onclick="switchTab('version')">📦 skill-version</button>
 </nav>
 
-<!-- TAB: WORKFLOW -->
-<section id="tab-workflow" class="tab-panel active">
+<!-- ═══ HERO ═══ -->
+<header class="hero">
+  <div class="overline">Agent Skill Quality Infrastructure</div>
+  <h1>Test it. Score it. <em>Ship it.</em></h1>
+  <p class="sub">
+    不是技能市场，不是内容平台。我们为
+    <a href="https://agentskills.io" style="color:var(--accent);">agentskills.io</a>
+    生态提供质量把关 —— 语义评分、行为测试、版本感知，从本地 CLI 到云端 CI。
+  </p>
+  <div class="cta">
+    <a href="https://pypi.org/project/agent-skill-infra/" class="cta-primary">⬇ pip install agent-skill-infra</a>
+    <a href="https://github.com/Liber1917/agent-skill-infra" class="cta-gh">⭐ Star on GitHub</a>
+  </div>
+</header>
+
+<!-- ═══ STATS ═══ -->
+<section class="section" style="padding-top:0;">
   <div class="stat-row">
-    <div class="stat-card c-accent"><div class="icon">📊</div><div class="num">3</div><div class="label">CLI 工具</div></div>
-    <div class="stat-card c-green"><div class="icon">✅</div><div class="num">162</div><div class="label">测试通过</div></div>
-    <div class="stat-card c-purple"><div class="icon">🧩</div><div class="num">5</div><div class="label">判定器类型</div></div>
-    <div class="stat-card c-accent"><div class="icon">⚡</div><div class="num">&lt;10s</div><div class="label">全量测试耗时</div></div>
-  </div>
-
-  <h3 style="color:var(--accent);margin-bottom:1rem;">从创建到发布的完整管线</h3>
-  <div class="wf-steps">
-    <div class="wf-step">
-      <div class="step-num">1</div>
-      <h4>编写 Skill</h4>
-      <p>SKILL.md + evals.json</p>
-      <span class="wf-arrow">→</span>
-    </div>
-    <div class="wf-step">
-      <div class="step-num">2</div>
-      <h4>质量检查</h4>
-      <p>skill-quality</p>
-      <span class="wf-arrow">→</span>
-    </div>
-    <div class="wf-step">
-      <div class="step-num">3</div>
-      <h4>行为测试</h4>
-      <p>skill-test run</p>
-      <span class="wf-arrow">→</span>
-    </div>
-    <div class="wf-step">
-      <div class="step-num">4</div>
-      <h4>版本发布</h4>
-      <p>skill-version baseline</p>
-    </div>
-  </div>
-
-  <div class="try-row">
-    <span style="color:var(--muted);font-size:.8rem;margin-right:.5rem;align-self:center;">🚀 快速体验：</span>
-    <button class="try-btn active" onclick="runDemo('full')">$ 完整流程演示</button>
-    <button class="try-btn" onclick="runDemo('install')">$ pip install</button>
-    <button class="try-btn" onclick="runDemo('quality')">$ skill-quality</button>
-    <button class="try-btn" onclick="runDemo('test')">$ skill-test</button>
-  </div>
-
-  <div class="cli-demo">
-    <div class="cli-header">
-      <span class="cli-dot red"></span><span class="cli-dot yellow"></span><span class="cli-dot green"></span>
-      <span class="cli-prompt">agent-skill-infra demo</span>
-    </div>
-    <div class="cli-body"><pre id="demo-output">
-<span class="out"># 🧩 agent-skill-infra v0.2.0 — Skill 全生命周期工具链</span>
-
-<span class="cmd">$ pip install agent-skill-infra</span>
-<span class="out">Successfully installed agent-skill-infra-0.2.0</span>
-
-<span class="cmd">$ skill-quality docs/examples/demo-skill/SKILL.md --output json</span>
-<span class="out">{</span>
-<span class="out">  "skill_name": "code-review-checklist",</span>
-<span class="out">  "overall_score": 0.92,</span>
-<span class="out">  "dimensions": [</span>
-<span class="out">    {"name": "trigger_precision", "score": 0.90},</span>
-<span class="out">    {"name": "helloandy_8dim", "score": 0.94}</span>
-<span class="out">  ]</span>
-<span class="out">}</span>
-
-<span class="cmd">$ skill-test run docs/examples/demo-skill/evals.json --adapter mock</span>
-<span class="out">                    Skill Test Report: code-review-checklist</span>
-<span class="out">┌──────────────────────┬──────┬───────┬──────────┬────────────────┐</span>
-<span class="out">│ Case ID              │ Pass │ Score │ Time(ms) │ Reason         │</span>
-<span class="out">├──────────────────────┼──────┼───────┼──────────┼────────────────┤</span>
-<span class="pass">│ ✓ should-contain…    │ PASS │ 0.750 │       0  │ 3/4 keywords   │</span>
-<span class="pass">│ ✓ should-detect…     │ PASS │ 0.800 │       0  │ 4/5 keywords   │</span>
-<span class="out">│ …                   │ …    │ …     │        …  │ …              │</span>
-<span class="out">├──────────────────────┼──────┼───────┼──────────┼────────────────┤</span>
-<span class="out">│ Total: 5             │ Pass:│ Fail: │ Rate:    │ Time:  0ms     │</span>
-<span class="out">│                      │  2   │  3    │  40.0%   │                │</span>
-<span class="out">└──────────────────────┴──────┴───────┴──────────┴────────────────┘</span>
-
-<span class="cmd">$ skill-version diff . --old-ref HEAD~3 --new-ref HEAD --output json</span>
-<span class="out">[结构化 diff 输出，含文件路径、增删行数、变更摘要]</span>
-    </pre></div>
+    <div class="stat-card"><div class="icon">📊</div><div class="num">3</div><div class="label">CLI 工具</div></div>
+    <div class="stat-card"><div class="icon">✅</div><div class="num">221</div><div class="label">测试通过</div></div>
+    <div class="stat-card"><div class="icon">🧪</div><div class="num">5</div><div class="label">判定器类型</div></div>
+    <div class="stat-card"><div class="icon">🧠</div><div class="num">3</div><div class="label">评分层级</div></div>
+    <div class="stat-card"><div class="icon">🎯</div><div class="num">v0.3.0</div><div class="label">最新版本</div></div>
   </div>
 </section>
 
-<!-- TAB: QUALITY -->
-<section id="tab-quality" class="tab-panel">
-  <h3 style="color:var(--accent);margin-bottom:.5rem;">✅ skill-quality — Quality Check</h3>
-  <p style="color:var(--muted);font-size:.84rem;margin-bottom:1rem;">
-    基于 helloandy 8 维度评分体系，自动评估 SKILL.md 质量。支持集成 agent-skill-linter 和安全扫描。
+<!-- ═══ PHILOSOPHY ═══ -->
+<section class="section" style="border-bottom:1px solid var(--border);">
+  <h2><span>·</span> 设计哲学</h2>
+  <div class="phil-grid">
+    <div class="phil-card">
+      <h4><span class="em">🤖</span>不用写死的 benchmark</h4>
+      <p>关键词正则只是 fallback。真正的评估通过 LLM 完成 —— Anthropic Claude 或 GitHub Models（免费）。工具适应 Skill，而不是反过来。</p>
+    </div>
+    <div class="phil-card">
+      <h4><span class="em">📋</span>打分不能只给一个数字</h4>
+      <p>每份质量报告都包含 8 维度分析 + 可执行的改进建议。3rd-party 提交 Issue 后自动收到结果。</p>
+    </div>
+    <div class="phil-card">
+      <h4><span class="em">🆓</span>免费层级给所有人</h4>
+      <p>GitHub Models（gpt-4o-mini）通过 <code>--gh-models</code> 零成本运行。CI 中自动注入 GITHUB_TOKEN，无需任何 API key。</p>
+    </div>
+    <div class="phil-card">
+      <h4><span class="em">📐</span>兼容 agentskills.io 规范</h4>
+      <p>解析 SKILL.md 的 YAML frontmatter（name/description）+ Markdown body。遵循 progressive disclosure 设计（≤500 行检查）。</p>
+    </div>
+    <div class="phil-card">
+      <h4><span class="em">🌐</span>三通道覆盖</h4>
+      <p>本地 CLI、GitHub Issue 自动测试、CI pipeline。同一个工具，哪里需要就在哪里跑。</p>
+    </div>
+    <div class="phil-card">
+      <h4><span class="em">🔒</span>安全 + 版本双保险</h4>
+      <p>Cisco Scanner 集成做安装前扫描，skill-version 做变更感知（diff → 行为差异 → 回滚）。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ TABS ═══ -->
+<section class="section" style="padding:1.5rem 0 0;">
+  <h2 style="text-align:center;margin-bottom:1rem;"><span>⚡</span> 三个模块</h2>
+</section>
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchTab('quality')">✅ skill-quality</button>
+  <button class="tab-btn" onclick="switchTab('test')">🧪 skill-test</button>
+  <button class="tab-btn" onclick="switchTab('version')">📦 skill-version</button>
+</div>
+
+<!-- ═══ TAB: QUALITY ═══ -->
+<section id="tab-quality" class="tab-panel active" style="max-width:1000px;margin:0 auto;">
+  <p style="color:var(--muted);font-size:.84rem;margin-bottom:1.5rem;">
+    三层评估引擎，自动选择最佳方案。基于 8 维度评分 + 可执行改进建议。
   </p>
 
   <table class="tbl">
-    <tr><th>检查器</th><th>评分维度</th><th>输出</th></tr>
-    <tr><td>TriggerChecker</td><td>触发词覆盖度 + 特异性</td><td>0.0-1.0 分数 + 发现列表</td></tr>
-    <tr><td>OutputChecker</td><td>输出格式 + 示例 + 约束</td><td>格式/示例/分段检测</td></tr>
-    <tr><td>ToleranceChecker</td><td>错误处理信号</td><td>try/catch/fallback 等 6 个信号</td></tr>
-    <tr><td>TokenChecker</td><td>行数效率</td><td>行数统计 + 效率评分</td></tr>
-    <tr><td>HelloAndyChecker</td><td>8 维度综合评分</td><td>技术 5 维度 + 输出 3 维度</td></tr>
-    <tr><td>LinterAdapter</td><td>agent-skill-linter (可选)</td><td>17 条格式规则</td></tr>
-    <tr><td>SecurityIntegration</td><td>Cisco Scanner (可选)</td><td>安全扫描结果</td></tr>
+    <tr><th>层级</th><th>命令</th><th>引擎</th><th>成本</th><th>语言支持</th></tr>
+    <tr><td>🚀 快速自检</td><td><code>skill-quality &lt;path&gt;</code></td><td>关键词正则</td><td>免费</td><td>英文为主</td></tr>
+    <tr><td>🧠 语义评估</td><td><code>skill-quality &lt;path&gt; --llm</code></td><td>Anthropic Claude</td><td>按量</td><td>全语言</td></tr>
+    <tr><td>🆓 免费智能</td><td><code>skill-quality &lt;path&gt; --gh-models</code></td><td>GitHub Models</td><td><strong>零成本</strong></td><td>全语言</td></tr>
   </table>
+
+  <p style="color:var(--muted);font-size:.8rem;margin:.5rem 0 1.5rem;">
+    可选集成：<code>--lint</code>（agent-skill-linter，17 条格式规则）、<code>--security</code>（Cisco Scanner 安全扫描）
+  </p>
 
   <div class="cli-demo">
     <div class="cli-header">
       <span class="cli-dot red"></span><span class="cli-dot yellow"></span><span class="cli-dot green"></span>
-      <span class="cli-prompt">$ skill-quality /path/to/SKILL.md --output json</span>
+      <span class="cli-prompt">$ skill-quality my-skill/SKILL.md --gh-models --output json</span>
     </div>
     <div class="cli-body"><pre>
-<span class="cmd">$ skill-quality /path/to/SKILL.md --output json</span>
+<span class="tip"># 使用 GitHub Models（免费），gpt-4o-mini 语义评估</span>
+<span class="cmd">$ skill-quality my-skill/SKILL.md --gh-models --output json</span>
 <span class="out">{</span>
-<span class="out">  <span class="hl">"skill_name"</span>: "code-review-checklist",</span>
-<span class="out">  <span class="hl">"overall_score"</span>: 0.92,</span>
-<span class="out">  "file_path": "/path/to/SKILL.md",</span>
-<span class="out">  "total_lines": 111,</span>
-<span class="out">  "token_estimate": 935,</span>
+<span class="out">  <span class="hl">"skill_name"</span>: "darwin-skill",</span>
+<span class="out">  <span class="hl">"overall_score"</span>: 0.91,</span>
+<span class="out">  "total_lines": 244,</span>
+<span class="out">  "token_estimate": 2103,</span>
 <span class="out">  "dimensions": [</span>
 <span class="out">    {</span>
 <span class="out">      <span class="hl">"name"</span>: "trigger_precision",</span>
-<span class="out">      <span class="hl">"score"</span>: 0.90,</span>
-<span class="out">      <span class="pass">"findings"</span>: ["Good keyword coverage with domain-specific terms"]</span>
+<span class="out">      <span class="hl">"score"</span>: 0.95,</span>
+<span class="out">      <span class="pass">"findings"</span>: ["Clear trigger keywords in description"]</span>
 <span class="out">    },</span>
 <span class="out">    {</span>
-<span class="out">      <span class="hl">"name"</span>: "helloandy_8dim",</span>
-<span class="out">      <span class="hl">"score"</span>: 0.94,</span>
+<span class="out">      <span class="hl">"name"</span>: "helloandy_8dim_gh_models",</span>
+<span class="out">      <span class="hl">"score"</span>: 0.91,</span>
 <span class="out">      <span class="pass">"findings"</span>: [</span>
-<span class="out">        "Good keyword coverage",</span>
-<span class="out">        "Output format defined",</span>
-<span class="out">        "Examples provided",</span>
-<span class="out">        "Error handling: 6 signals detected",</span>
-<span class="out">        "Edge case coverage: 4 signals"</span>
+<span class="out">        <span class="pass">"Summary: Well-structured skill with clear descriptions"</span>,</span>
+<span class="out">        <span class="pass">"[trigger_precision] → Add specific trigger keywords"</span>,</span>
+<span class="out">        <span class="pass">"[example_quality] → Include more input/output examples"</span></span>
 <span class="out">      ]</span>
 <span class="out">    }</span>
 <span class="out">  ]</span>
 <span class="out">}</span>
-
-<span class="cmd">$ skill-quality /path/to/SKILL.md --lint</span>
-<span class="out">Quality Report: code-review-checklist</span>
-<span class="out">Overall Score: 92%</span>
-<span class="out">  trigger_precision: 90%</span>
-<span class="out">    - Good keyword coverage with domain-specific terms</span>
-<span class="out">  helloandy_8dim: 94%</span>
-<span class="out">    - [trigger] Good keyword coverage</span>
-<span class="out">    - [output] Output format defined, Examples provided</span>
-<span class="out">    - [error] Good error handling coverage (6 signals)</span>
-<span class="out">    - [edge] Good edge case coverage (4 signals)</span>
-<span class="out">  agent-skill-linter: 100%</span>
-<span class="out">    - No linter violations found.</span>
     </pre></div>
   </div>
 </section>
 
-<!-- TAB: TEST -->
-<section id="tab-test" class="tab-panel">
-  <h3 style="color:var(--accent);margin-bottom:.5rem;">🧪 skill-test — Behavior Test Runner</h3>
-  <p style="color:var(--muted);font-size:.84rem;margin-bottom:1rem;">
-    运行 evals.json 测试套件，5 种判定器类型，支持 CI 集成。
+<!-- ═══ TAB: TEST ═══ -->
+<section id="tab-test" class="tab-panel" style="max-width:1000px;margin:0 auto;">
+  <p style="color:var(--muted);font-size:.84rem;margin-bottom:1.5rem;">
+    运行 evals.json 测试套件。5 种判定器，从关键词到语义等价。
   </p>
 
   <table class="tbl">
     <tr><th>判定器</th><th>用途</th><th>示例</th></tr>
     <tr><td>keyword</td><td>关键词匹配（any/all 模式）</td><td>输出是否包含预期关键词</td></tr>
     <tr><td>schema</td><td>JSON Schema 验证</td><td>输出是否符合 JSON Schema</td></tr>
+    <tr><td>llm</td><td>LLM-as-Judge（语义等价）</td><td>语义等价判断（Anthropic API）</td></tr>
     <tr><td>flow</td><td>工具调用序列校验</td><td>Agent 是否按预期顺序调用工具</td></tr>
     <tr><td>snapshot</td><td>快照对比（回归检测）</td><td>输出是否与基线快照一致</td></tr>
-    <tr><td>llm</td><td>LLM-as-Judge（语义等价）</td><td>两次输出语义是否等价（需 API Key）</td></tr>
   </table>
 
-  <p style="color:var(--muted);font-size:.84rem;margin:1rem 0;">
-    支持的 evals.json 格式：
-  </p>
-  <div class="json-out">
-{
-  "<span class="hl">skill</span>": "code-review-checklist",
-  "<span class="hl">version</span>": "1.0.0",
-  "<span class="hl">cases</span>": [
-    {
-      "<span class="hl">id</span>": "should-contain-report-header",
-      "<span class="hl">prompt</span>": "帮我 review 这个 PR...",
-      "<span class="hl">judge_type</span>": "keyword",
-      "<span class="hl">expected</span>": {
-        "keywords": ["Code Review", "PASS", "FAIL", "security"],
-        "mode": "any",
-        "threshold": 0.5
-      }
-    },
-    {
-      "<span class="hl">id</span>": "should-detect-security-issue",
-      "<span class="hl">prompt</span>": "Review this PR for security issues",
-      "<span class="hl">judge_type</span>": "keyword",
-      "<span class="hl">expected</span>": {
-        "keywords": ["security", "injection", "auth"],
-        "mode": "any",
-        "threshold": 0.4
-      },
-      "<span class="warn">tags</span>": ["security", "positive"]
-    }
-  ]
-}
-  </div>
-
-  <div class="cli-demo" style="margin-top:1rem;">
+  <div class="cli-demo">
     <div class="cli-header">
       <span class="cli-dot red"></span><span class="cli-dot yellow"></span><span class="cli-dot green"></span>
       <span class="cli-prompt">$ skill-test run evals.json --adapter mock</span>
@@ -376,23 +318,22 @@ body { background:var(--bg); color:var(--text); font-family:var(--font); line-he
   </div>
 </section>
 
-<!-- TAB: VERSION -->
-<section id="tab-version" class="tab-panel">
-  <h3 style="color:var(--accent);margin-bottom:.5rem;">📦 skill-version — Version Awareness</h3>
-  <p style="color:var(--muted);font-size:.84rem;margin-bottom:1rem;">
-    追踪 Skill 变更、检测回归、安全分析、一键回滚。
+<!-- ═══ TAB: VERSION ═══ -->
+<section id="tab-version" class="tab-panel" style="max-width:1000px;margin:0 auto;">
+  <p style="color:var(--muted);font-size:.84rem;margin-bottom:1.5rem;">
+    agentskills.io spec 只定义了 <code>metadata.version</code> —— 版本感知填上 diff、回滚、回归检测的空白。
   </p>
 
   <table class="tbl">
     <tr><th>子命令</th><th>功能</th><th>示例</th></tr>
-    <tr><td>diff</td><td>结构化 diff 输出</td><td><code>skill-version diff . --old-ref HEAD~3</code></td></tr>
+    <tr><td>diff</td><td>结构化 diff（table/json）</td><td><code>skill-version diff . --old-ref HEAD~3</code></td></tr>
     <tr><td>check</td><td>diff + 安全分析</td><td><code>skill-version check . --security</code></td></tr>
     <tr><td>rollback</td><td>一键回滚</td><td><code>skill-version rollback . --target-ref HEAD~1 --yes</code></td></tr>
-    <tr><td>baseline store</td><td>存储基线快照</td><td><code>skill-version baseline store . case-1 output.txt</code></td></tr>
-    <tr><td>baseline detect</td><td>检测回归</td><td><code>skill-version baseline detect . case-1 output.txt</code></td></tr>
+    <tr><td>baseline store</td><td>存储快照基线</td><td><code>skill-version baseline store . case-1 out.txt</code></td></tr>
+    <tr><td>baseline detect</td><td>检测行为回归</td><td><code>skill-version baseline detect . case-1 out.txt</code></td></tr>
   </table>
 
-  <div class="cli-demo" style="margin-top:1rem;">
+  <div class="cli-demo">
     <div class="cli-header">
       <span class="cli-dot red"></span><span class="cli-dot yellow"></span><span class="cli-dot green"></span>
       <span class="cli-prompt">$ skill-version</span>
@@ -401,26 +342,29 @@ body { background:var(--bg); color:var(--text); font-family:var(--font); line-he
 <span class="cmd">$ skill-version diff . --old-ref HEAD~3 --new-ref HEAD</span>
 <span class="out">Version Diff: 0a1b2c3d... -> e4f5a6b7...</span>
 <span class="out"><span class="hl">4 file(s) changed</span>:</span>
-<span class="out">  modified  src/skill_infra/test_runner/judgers/llm_judge.py    +85  -0   ++++++++++</span>
-<span class="out">  modified  src/skill_infra/version_aware/cli.py                +148 -0   ++++++++++</span>
-<span class="out">  modified  pyproject.toml                                      +15  -2   ++++++--</span>
-<span class="out">  added     README.md                                           +56  -0   ++++++++++</span>
+<span class="out">  modified  src/skill_infra/test_runner/judgers/llm_judge.py    +85  -0</span>
+<span class="out">  modified  src/skill_infra/version_aware/cli.py                +148 -0</span>
+<span class="out">  modified  pyproject.toml                                      +15  -2</span>
+<span class="out">  added     README.md                                           +56  -0</span>
 
-<span class="cmd">$ skill-version check . --old-ref HEAD~3 --security</span>
-<span class="out">Version Check: 0a1b2c3d... -> e4f5a6b7...</span>
-<span class="out">Files changed: 4</span>
-<span class="out">  src/skill_infra/.../llm_judge.py (modified, +85/-0)</span>
-<span class="out">  src/skill_infra/.../cli.py (modified, +148/-0)</span>
-<span class="out">  pyproject.toml (modified, +15/-2)</span>
-<span class="out">  README.md (added, +56/-0)</span>
-<span class="out"><span class="pass">Security: clean</span></span>
-<span class="out">Max severity: none</span>
-
-<span class="cmd">$ skill-version rollback . --target-ref HEAD~1 --yes</span>
-<span class="out"><span class="warn">Rolled back to HEAD~1</span></span>
+<span class="cmd">$ skill-version check . --security</span>
+<span class="out"><span class="pass">Security: clean</span>  ·  Max severity: none</span>
     </pre></div>
   </div>
 </section>
+
+<!-- ═══ FOOTER ═══ -->
+<footer>
+  <div class="flinks">
+    <a href="https://github.com/Liber1917/agent-skill-infra">GitHub</a>
+    <a href="https://pypi.org/project/agent-skill-infra/">PyPI</a>
+    <a href="https://github.com/Liber1917/agent-skill-infra/blob/main/AGENTS.md">AGENTS.md</a>
+    <a href="https://github.com/Liber1917/agent-skill-infra/blob/main/llms.txt">llms.txt</a>
+    <a href="https://github.com/Liber1917/agent-skill-infra/issues/new?template=test-request.yml">Issue 测试</a>
+  </div>
+  <p>agent-skill-infra v0.3.0 · 221 tests · 3 CLI tools · MIT License</p>
+  <p style="margin-top:.4rem;">兼容 <a href="https://agentskills.io">agentskills.io</a> 规范</p>
+</footer>
 
 <script>
 function switchTab(name) {
@@ -429,115 +373,6 @@ function switchTab(name) {
   document.getElementById('tab-' + name).classList.add('active');
   event.target.classList.add('active');
 }
-
-function runDemo(mode) {
-  const btns = document.querySelectorAll('.try-btn');
-  btns.forEach(b => b.classList.remove('active'));
-  event.target.classList.add('active');
-
-  const out = document.getElementById('demo-output');
-  const demos = {
-    install: `<span class="cmd">$ pip install agent-skill-infra</span>
-<span class="out">Collecting agent-skill-infra</span>
-<span class="out">  Downloading agent_skill_infra-0.2.0-py3-none-any.whl</span>
-<span class="out">Successfully installed agent-skill-infra-0.2.0 typer-0.25.1 rich-13.9.4 jsonschema-4.23.0</span>
-
-<span class="out"># 验证安装</span>
-<span class="cmd">$ skill-test --help</span>
-<span class="out">Usage: skill-test [OPTIONS] COMMAND [ARGS]...</span>
-<span class="out">  Agent Skill behavior test runner</span>
-<span class="out">Commands:</span>
-<span class="out">  run   Run skill behavior tests from an evals.json file.</span>
-<span class="out">  show  Display a previously saved JSON report.</span>
-
-<span class="cmd">$ skill-quality --help</span>
-<span class="out">Usage: skill-quality [OPTIONS] [SKILL_PATH]</span>
-<span class="out">  Run quality checks on a SKILL.md file.</span>
-<span class="out">Options:</span>
-<span class="out">  --output  TEXT  [table|json]  --lint    Include linter</span>
-<span class="out">  --security       Include security scan</span>
-
-<span class="cmd">$ skill-version --help</span>
-<span class="out">Usage: skill-version [OPTIONS] COMMAND [ARGS]...</span>
-<span class="out">  Version-aware skill management.</span>
-<span class="out">Commands:</span>
-<span class="out">  diff  check  rollback  baseline</span>`,
-
-    quality: `<span class="cmd">$ skill-quality docs/examples/demo-skill/SKILL.md --output json</span>
-<span class="out">{</span>
-<span class="out">  <span class="hl">"skill_name"</span>: "code-review-checklist",</span>
-<span class="out">  <span class="hl">"overall_score"</span>: 0.92,</span>
-<span class="out">  "file_path": "docs/examples/demo-skill/SKILL.md",</span>
-<span class="out">  "total_lines": 111,</span>
-<span class="out">  "token_estimate": 935,</span>
-<span class="out">  "dimensions": [</span>
-<span class="out">    {</span>
-<span class="out">      <span class="hl">"name"</span>: "trigger_precision",</span>
-<span class="out">      <span class="hl">"score"</span>: 0.90,</span>
-<span class="out">      <span class="pass">"findings"</span>: ["Good keyword coverage with domain-specific terms"]</span>
-<span class="out">    },</span>
-<span class="out">    {</span>
-<span class="out">      <span class="hl">"name"</span>: "helloandy_8dim",</span>
-<span class="out">      <span class="hl">"score"</span>: 0.94,</span>
-<span class="out">      <span class="pass">"findings"</span>: [</span>
-<span class="out">        "Good keyword coverage",</span>
-<span class="out">        "Output format defined, Examples provided",</span>
-<span class="out">        "Error handling: 6 signals",</span>
-<span class="out">        "Edge case coverage: 4 signals"</span>
-<span class="out">      ]</span>
-<span class="out">    }</span>
-<span class="out">  ]</span>
-<span class="out">}</span>
-
-<span class="cmd">$ skill-quality docs/examples/demo-skill/SKILL.md --output table</span>
-<span class="out">Quality Report: code-review-checklist</span>
-<span class="out">Overall Score: 92%</span>
-<span class="out">  trigger_precision: 90%</span>
-<span class="out">    - Good keyword coverage with domain-specific terms</span>
-<span class="out">  helloandy_8dim: 94%</span>
-<span class="out">    - [trigger] Good keyword coverage</span>
-<span class="out">    - [output] Output format defined, Examples provided</span>
-<span class="out">    - [error] Good error handling coverage (6 signals)</span>
-<span class="out">    - [examples] Input/output examples present</span>
-<span class="out">    - [edge] Good edge case coverage (4 signals)</span>`,
-
-    test: `<span class="cmd">$ skill-test run docs/examples/demo-skill/evals.json --adapter mock</span>
-<span class="out">Running <span class="hl">5 test cases</span> with 'mock' adapter...</span>
-
-<span class="out">┌──────────────────────────────┬──────┬───────┬──────────┬────────────────┐</span>
-<span class="out">│ Case ID                      │ Pass │ Score │ Time(ms) │ Reason         │</span>
-<span class="out">├──────────────────────────────┼──────┼───────┼──────────┼────────────────┤</span>
-<span class="pass">│ ✓ should-contain-report…     │ PASS │ 0.750 │       0  │ 3/4 keywords   │</span>
-<span class="pass">│ ✓ should-detect-security…    │ PASS │ 0.800 │       0  │ 4/5 keywords   │</span>
-<span class="err">│ ✗ should-not-trigger…        │ FAIL │ 0.000 │       0  │ no keywords    │</span>
-<span class="err">│ ✗ output-should-be…          │ FAIL │ 0.250 │       0  │ 1/4 keywords   │</span>
-<span class="err">│ ✗ should-handle-error…       │ FAIL │ 0.000 │       0  │ no keywords    │</span>
-<span class="out">├──────────────────────────────┼──────┼───────┼──────────┼────────────────┤</span>
-<span class="out">│ Total: 5                     │ Pass │ Fail  │ Rate     │ Time: 0ms      │</span>
-<span class="out">│                              │  2   │  3    │ <span class="warn">40.0%</span>   │                │</span>
-<span class="out">└──────────────────────────────┴──────┴───────┴──────────┴────────────────┘</span>
-
-<span class="out"># 输出 JSON 报告</span>
-<span class="cmd">$ skill-test run evals.json --adapter mock --output json</span>
-<span class="out">{"skill_name":"code-review-checklist","results":[...],"pass_rate":0.4}</span>
-
-<span class="out"># 查看已保存的报告</span>
-<span class="cmd">$ skill-test show report.json</span>
-<span class="out">[Rich table rendering...]</span>`,
-  };
-
-  const demo = demos[mode];
-  if (demo) out.innerHTML = demo;
-}
 </script>
-
-<footer style="text-align:center; padding:2rem 1rem; color:var(--muted); font-size:.78rem; border-top:1px solid var(--border); margin-top:2rem;">
-  <a href="https://github.com/Liber1917/agent-skill-infra" target="_blank" style="color:var(--accent); text-decoration:none;">
-    ⭐ Liber1917/agent-skill-infra on GitHub
-  </a>
-  &nbsp;·&nbsp; v0.2.0 &nbsp;·&nbsp; 162 tests &nbsp;·&nbsp; 3 CLI tools &nbsp;·&nbsp; MIT
-</footer>
-
 </body>
 </html>
-
