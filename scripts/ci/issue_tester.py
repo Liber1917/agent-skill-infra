@@ -245,6 +245,31 @@ def _build_result(
     # Try to extract test counts from pytest/npm/bun output
     passed, failed, total = 0, 0, 0
 
+    # skill-quality JSON output: {"overall_score": 0.53, "dimensions": [...]}
+    if '"overall_score"' in stdout:
+        try:
+            import json as _json
+            data = _json.loads(stdout)
+            score = data.get("overall_score", 0)
+            # Treat quality score as: pass if >= 0.5
+            passed = 1 if score >= 0.5 else 0
+            total = 1
+            return {
+                "command": command,
+                "exit_code": 0 if score >= 0.5 else 1,
+                "test_count": 1,
+                "passed": passed,
+                "failed": 1 - passed,
+                "errors": 0,
+                "stdout": f"Quality score: {score:.0%} ({score:.2f})",
+                "stderr": stderr[-2000:] if len(stderr) > 2000 else stderr,
+                "duration_ms": duration_ms,
+                "error_type": error_type,
+                "quality_score": score,
+            }
+        except Exception:
+            pass  # fall through to normal parsing
+
     # pytest: "5 passed", "2 failed"
     pytest_match = re.search(r"(\d+)\s+passed", stdout)
     if pytest_match:
@@ -308,6 +333,7 @@ def generate_report(
     command = result.get("command", "unknown")
 
     pass_rate = f"{(passed / total * 100):.1f}%" if total > 0 else "N/A"
+    quality_score = result.get("quality_score")
 
     lines = [
         f"## Test Report: {repo_url}",
@@ -319,8 +345,14 @@ def generate_report(
         f"| **Type** | `{project_type}` |",
         f"| **Command** | `{command}` |",
         f"| **Duration** | {duration_s:.1f}s |",
-        "",
     ]
+
+    # Quality score line for skill-type repos
+    if quality_score is not None:
+        label = "Good" if quality_score >= 0.7 else "Fair" if quality_score >= 0.5 else "Needs Work"
+        lines.append(f"| **Quality Score** | {quality_score:.0%} ({label}) |")
+
+    lines.append("")
 
     if exit_code == -1:
         error_type = result.get("error_type", "")
@@ -356,6 +388,12 @@ def generate_report(
             "| Passed | Failed | Total | Rate |",
             "|--------|--------|-------|------|",
             f"| {passed} | {failed} | {total} | {pass_rate} |",
+        ])
+    elif quality_score is not None:
+        lines.extend([
+            "### Result: Skill Quality Assessment",
+            "",
+            f"Quality score: **{quality_score:.0%}** ({quality_score:.2f}/1.00)",
         ])
     else:
         lines.extend([
