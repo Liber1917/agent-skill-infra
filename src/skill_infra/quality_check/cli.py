@@ -40,6 +40,11 @@ def check(
         "--lint",
         help="Include agent-skill-linter check (requires npx).",
     ),
+    llm: bool = typer.Option(
+        False,
+        "--llm",
+        help="Use LLM-based quality evaluation (requires ANTHROPIC_API_KEY).",
+    ),
 ) -> None:
     """Run quality checks on a SKILL.md file."""
     # Resolve path: if directory, look for SKILL.md inside
@@ -59,7 +64,19 @@ def check(
 
     # Run checkers
     trigger = TriggerChecker().check(parsed)
-    helloandy = HelloAndyChecker().check(parsed)
+
+    # Use LLM-based checker when available and requested
+    if llm:
+        from skill_infra.quality_check.llm_quality import LLMQualityChecker
+
+        quality_llm = LLMQualityChecker()
+        if quality_llm.is_available():
+            helloandy = quality_llm.check(parsed)
+        else:
+            typer.echo("Warning: --llm set but no ANTHROPIC_API_KEY, using fallback", err=True)
+            helloandy = HelloAndyChecker().check(parsed)
+    else:
+        helloandy = HelloAndyChecker().check(parsed)
 
     dimensions = [trigger, helloandy]
 
