@@ -195,10 +195,12 @@ def run_tests(repo_dir: Path, project_type: str, custom_cmd: str = "") -> dict[s
                 -1, "", "SKILL.md not found", "skill-quality",
                 error_type="unknown_type",
             )
-        rc, stdout, stderr, err = _run(
-            ["uv", "run", "skill-quality", str(skill_md), "--output", "json"],
-            TIMEOUT_TEST,
-        )
+        # Prefer GitHub Models (free) when available, else keyword fallback
+        gh_token = os.environ.get("GITHUB_TOKEN", "")
+        cmd = ["uv", "run", "skill-quality", str(skill_md), "--output", "json"]
+        if gh_token:
+            cmd.append("--gh-models")
+        rc, stdout, stderr, err = _run(cmd, TIMEOUT_TEST)
         return _build_result(rc, stdout, stderr, "skill-quality check", error_type=err)
 
     if project_type == "config":

@@ -45,6 +45,11 @@ def check(
         "--llm",
         help="Use LLM-based quality evaluation (requires ANTHROPIC_API_KEY).",
     ),
+    gh_models: bool = typer.Option(
+        False,
+        "--gh-models",
+        help="Use GitHub Models free API for evaluation (requires GITHUB_TOKEN).",
+    ),
 ) -> None:
     """Run quality checks on a SKILL.md file."""
     # Resolve path: if directory, look for SKILL.md inside
@@ -66,14 +71,29 @@ def check(
     trigger = TriggerChecker().check(parsed)
 
     # Use LLM-based checker when available and requested
-    if llm:
+    if gh_models:
+        from skill_infra.quality_check.gh_model_quality import GitHubModelQualityChecker
+
+        gh_checker = GitHubModelQualityChecker()
+        if gh_checker.is_available():
+            helloandy = gh_checker.check(parsed)
+        else:
+            typer.echo(
+                "Warning: --gh-models set but no GITHUB_TOKEN, using fallback",
+                err=True,
+            )
+            helloandy = HelloAndyChecker().check(parsed)
+    elif llm:
         from skill_infra.quality_check.llm_quality import LLMQualityChecker
 
         quality_llm = LLMQualityChecker()
         if quality_llm.is_available():
             helloandy = quality_llm.check(parsed)
         else:
-            typer.echo("Warning: --llm set but no ANTHROPIC_API_KEY, using fallback", err=True)
+            typer.echo(
+                "Warning: --llm set but no ANTHROPIC_API_KEY, using fallback",
+                err=True,
+            )
             helloandy = HelloAndyChecker().check(parsed)
     else:
         helloandy = HelloAndyChecker().check(parsed)
