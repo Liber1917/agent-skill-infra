@@ -28,6 +28,11 @@ def run(
     adapter: str = typer.Option("mock", help="Agent adapter to use (currently only 'mock')"),
     output: str = typer.Option("table", help="Output format: 'table' or 'json'"),
     fail_fast: bool = typer.Option(False, help="Stop on first failure"),
+    update_snapshots: bool = typer.Option(
+        False,
+        "--update-snapshots",
+        help="Overwrite all snapshot baselines with current output.",
+    ),
 ) -> None:
     """Run skill behavior tests from an evals.json file."""
     if adapter == "mock":
@@ -37,7 +42,9 @@ def run(
         raise typer.Exit(code=1)
 
     try:
-        runner = SkillTestRunner.from_evals_file(evals_file, agent)
+        runner = SkillTestRunner.from_evals_file(
+            evals_file, agent, update_snapshots=update_snapshots
+        )
     except EvalsValidationError as exc:
         typer.echo(f"Invalid evals.json: {exc}", err=True)
         raise typer.Exit(code=1) from None

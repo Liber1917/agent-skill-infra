@@ -14,6 +14,7 @@ from skill_infra.test_runner.judgers.flow import FlowJudge
 from skill_infra.test_runner.judgers.keyword import KeywordJudger
 from skill_infra.test_runner.judgers.llm_stub import LLMStubJudger
 from skill_infra.test_runner.judgers.schema import SchemaJudger
+from skill_infra.test_runner.judgers.snapshot_judge import SnapshotJudger
 
 # Default judger registry, keyed by judge_type string
 _DEFAULT_JUDGER_REGISTRY = {
@@ -21,6 +22,7 @@ _DEFAULT_JUDGER_REGISTRY = {
     "schema": SchemaJudger(),
     "llm": LLMStubJudger(),
     "flow": FlowJudge(),
+    "snapshot": SnapshotJudger(),
 }
 
 
@@ -47,7 +49,9 @@ class SkillTestRunner:
     # ------------------------------------------------------------------
 
     @classmethod
-    def from_evals_file(cls, path: str | Path, adapter: AgentAdapter) -> SkillTestRunner:
+    def from_evals_file(
+        cls, path: str | Path, adapter: AgentAdapter, update_snapshots: bool = False
+    ) -> SkillTestRunner:
         """Load EvalCase list from an evals.json file.
 
         Expected JSON schema::
@@ -71,7 +75,15 @@ class SkillTestRunner:
         validate_evals(raw)
         skill_name = raw.get("skill", "unknown")
         version = raw.get("version", "0.0.0")
-        runner = cls(adapter=adapter)
+
+        # Configure snapshot judger if update-snapshots is set
+        registry = dict(_DEFAULT_JUDGER_REGISTRY)
+        if update_snapshots and "snapshot" in registry:
+            from skill_infra.test_runner.judgers.snapshot_judge import SnapshotJudger
+
+            registry["snapshot"] = SnapshotJudger(update_snapshots=True)
+
+        runner = cls(adapter=adapter, judger_registry=registry)
         runner.cases = [
             EvalCase(
                 id=c["id"],
