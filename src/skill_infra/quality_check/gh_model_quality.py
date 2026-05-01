@@ -34,9 +34,14 @@ _SYSTEM_PROMPT = (
     "Score 0-1.\n"
     "8. edge_cases: Does the skill handle null, missing, malformed inputs? "
     "Score 0-1.\n\n"
-    "Respond with JSON only (no markdown, no explanation):\n"
-    '{"dimensions":[{"name":"...","score":0.X,"findings":["..."]},...],'
-    '"overall_score":0.X}'
+    "Respond with JSON only (no markdown, no explanation). For each dimension,\n"
+    "include BOTH 'findings' (what was observed) AND 'improvements' "
+    "(actionable suggestions, 1-2 sentences each).\n\n"
+    "JSON format:\n"
+    '{"dimensions":[{"name":"...","score":0.X,'
+    '"findings":["..."],"improvements":["..."]},...],'
+    '"overall_score":0.X,'
+    '"summary":"1-2 sentence overall summary with top 3 priorities"}'
 )
 
 _USER_TEMPLATE = (
@@ -153,8 +158,14 @@ class GitHubModelQualityChecker:
             scores.append(score)
             for f in dim.get("findings", []):
                 findings.append(f"[{name}] {f}")
+            for imp in dim.get("improvements", []):
+                findings.append(f"[{name}] → {imp}")
 
         overall = sum(scores) / len(scores) if scores else data.get("overall_score", 0.5)
+        summary = data.get("summary", "")
+        if summary:
+            findings.insert(0, f"Summary: {summary}")
+
         return DimensionScore(
             name=cls._DIM_NAME, score=overall,
             findings=findings or [f"Overall: {overall:.0%}"],

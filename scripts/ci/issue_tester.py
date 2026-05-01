@@ -256,9 +256,20 @@ def _build_result(
             # Treat quality score as: pass if >= 0.5
             passed = 1 if score >= 0.5 else 0
             total = 1
+            # Collect findings from LLM dimensions
+            findings: list[str] = []
+            for dim in data.get("dimensions", []):
+                for f in dim.get("findings", []):
+                    findings.append(f"[{dim.get('name', 'dim')}] {f}")
+                for imp in dim.get("improvements", []):
+                    findings.append(f"[{dim.get('name', 'dim')}] → {imp}")
+            summary = data.get("summary", "")
+            if summary:
+                findings.insert(0, f"Summary: {summary}")
+
             return {
                 "command": command,
-                "exit_code": 0,  # quality score carries pass/fail semantics
+                "exit_code": 0,
                 "test_count": 1,
                 "passed": passed,
                 "failed": 1 - passed,
@@ -268,6 +279,7 @@ def _build_result(
                 "duration_ms": duration_ms,
                 "error_type": error_type,
                 "quality_score": score,
+                "findings": findings,
             }
         except Exception:
             pass  # fall through to normal parsing
@@ -417,6 +429,25 @@ def generate_report(
                 "|--------|-------|------|",
                 f"| {passed} | {total} | {pass_rate} |",
             ])
+
+    # Add improvements section if present
+    improvements = [
+        f for f in result.get("findings", [])
+        if "→" in str(f)
+    ]
+    if not improvements:
+        # Try parsing from stdout for JSON-based checkers
+        stdout = result.get("stdout", "")
+        improvements = [ln for ln in stdout.split("\n") if "→" in ln]
+    if improvements:
+        lines.extend([
+            "",
+            "### Suggestions for Improvement",
+            "",
+        ])
+        for i, imp in enumerate(improvements[:8]):  # top 8
+            lines.append(f"{i+1}. {imp.split('→', 1)[-1].strip()}")
+        lines.append("")
 
     # Add stdout summary if tests ran
     stdout = result.get("stdout", "")
