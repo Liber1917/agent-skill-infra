@@ -94,6 +94,7 @@ class CiscoScannerAdapter(ToolAdapter):
 
         cmd = [self._binary, "scan", target]
         t0 = time.monotonic()
+        proc = None
         try:
             proc = await asyncio.create_subprocess_exec(
                 *cmd,
@@ -110,7 +111,8 @@ class CiscoScannerAdapter(ToolAdapter):
                 elapsed_ms=int((time.monotonic() - t0) * 1000),
             )
         except TimeoutError:
-            proc.kill()
+            if proc is not None:
+                proc.kill()
             return ToolResult(
                 success=False,
                 stdout="",

@@ -62,10 +62,12 @@ class LLMJudge(Judger):
         user_message = _USER_TEMPLATE.format(output=output, criteria=criteria)
 
         with httpx.Client(timeout=30.0) as client:
+            assert self._api_key is not None  # already guarded in judge()
+            api_key: str = self._api_key
             resp = client.post(
                 "https://api.anthropic.com/v1/messages",
                 headers={
-                    "x-api-key": self._api_key,
+                    "x-api-key": api_key,
                     "anthropic-version": "2023-06-01",
                     "content-type": "application/json",
                 },
