@@ -226,7 +226,7 @@ def run_tests(repo_dir: Path, project_type: str, custom_cmd: str = "") -> dict[s
     )
 
 
-def _count_config_files(repo_dir: Path) -> dict[str, int]:
+def _count_config_files(repo_dir: Path) -> dict[str, object]:
     """Count agent/skill/command/rule files in a config-driven repo."""
     counts: dict[str, int] = {}
     errors = 0
