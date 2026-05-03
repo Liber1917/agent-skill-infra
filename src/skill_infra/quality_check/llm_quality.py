@@ -94,6 +94,7 @@ class LLMQualityChecker:
             return None
         try:
             import json as _json
+
             data = _json.loads(self._last_response)
             for dim in data.get("dimensions", []):
                 if dim.get("name") == "trigger_precision":
@@ -113,6 +114,7 @@ class LLMQualityChecker:
             return None
         try:
             import json as _json
+
             data = _json.loads(self._last_response)
             scores: list[float] = []
             for dim in data.get("dimensions", []):
