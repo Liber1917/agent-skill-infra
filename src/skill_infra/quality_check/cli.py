@@ -76,7 +76,13 @@ def check(
         if gh_checker.is_available():
             helloandy = gh_checker.check(parsed)
             llm_trigger = gh_checker.extract_trigger()
-            trigger = llm_trigger if llm_trigger else TriggerChecker().check(parsed)
+            llm_7dim = gh_checker.extract_helloandy_excluding_trigger()
+            if llm_trigger and llm_7dim:
+                trigger = llm_trigger
+                helloandy = llm_7dim
+            else:
+                trigger = TriggerChecker().check(parsed)
+                helloandy = HelloAndyChecker().check(parsed)
         else:
             typer.echo(
                 "Warning: --gh-models set but no GITHUB_TOKEN, using fallback",
@@ -91,7 +97,13 @@ def check(
         if quality_llm.is_available():
             helloandy = quality_llm.check(parsed)
             llm_trigger = quality_llm.extract_trigger()
-            trigger = llm_trigger if llm_trigger else TriggerChecker().check(parsed)
+            llm_7dim = quality_llm.extract_helloandy_excluding_trigger()
+            if llm_trigger and llm_7dim:
+                trigger = llm_trigger
+                helloandy = llm_7dim
+            else:
+                trigger = TriggerChecker().check(parsed)
+                helloandy = HelloAndyChecker().check(parsed)
         else:
             typer.echo(
                 "Warning: --llm set but no ANTHROPIC_API_KEY, using fallback",

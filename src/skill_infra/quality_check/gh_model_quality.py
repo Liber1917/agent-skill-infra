@@ -103,6 +103,30 @@ class GitHubModelQualityChecker:
             pass
         return None
 
+    def extract_helloandy_excluding_trigger(self) -> DimensionScore | None:
+        """Return helloandy score as avg of dimensions 2-8 (excl. trigger)."""
+        if not self._last_response:
+            return None
+        try:
+            data = json.loads(self._last_response)
+            scores: list[float] = []
+            for dim in data.get("dimensions", []):
+                if dim.get("name") == "trigger_precision":
+                    continue  # exclude trigger
+                score = max(0.0, min(1.0, float(dim.get("score", 0.5))))
+                scores.append(score)
+            if not scores:
+                return None
+            avg = sum(scores) / len(scores)
+            return DimensionScore(
+                name="helloandy_8dim",
+                score=avg,
+                findings=[f"Average of {len(scores)} dimensions"],
+            )
+        except Exception:
+            pass
+        return None
+
     def is_available(self) -> bool:
         return bool(self._token)
 
