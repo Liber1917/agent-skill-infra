@@ -44,13 +44,13 @@ def test_checker_class_count() -> None:
 
 
 def test_checker_types_match_readme() -> None:
-    """README mentions the 3 modules: quality_check, test_runner, version_aware."""
+    """README mentions the 3 CLI tools."""
     readme = Path(__file__).parent.parent / "README.md"
     content = readme.read_text(encoding="utf-8")
 
-    assert "quality_check" in content, "README missing quality_check reference"
-    assert "test_runner" in content, "README missing test_runner reference"
-    assert "version_aware" in content, "README missing version_aware reference"
+    assert "skill-quality" in content, "README missing skill-quality reference"
+    assert "skill-test" in content, "README missing skill-test reference"
+    assert "skill-version" in content, "README missing skill-version reference"
 
 
 # ---------------------------------------------------------------------------

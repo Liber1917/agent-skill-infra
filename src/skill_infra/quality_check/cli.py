@@ -68,20 +68,21 @@ def check(
         raise typer.Exit(code=1) from None
 
     # Run checkers
-    trigger = TriggerChecker().check(parsed)
-
-    # Use LLM-based checker when available and requested
+    # When using LLM, use its trigger_precision instead of keyword-based
     if gh_models:
         from skill_infra.quality_check.gh_model_quality import GitHubModelQualityChecker
 
         gh_checker = GitHubModelQualityChecker()
         if gh_checker.is_available():
             helloandy = gh_checker.check(parsed)
+            llm_trigger = gh_checker.extract_trigger()
+            trigger = llm_trigger if llm_trigger else TriggerChecker().check(parsed)
         else:
             typer.echo(
                 "Warning: --gh-models set but no GITHUB_TOKEN, using fallback",
                 err=True,
             )
+            trigger = TriggerChecker().check(parsed)
             helloandy = HelloAndyChecker().check(parsed)
     elif llm:
         from skill_infra.quality_check.llm_quality import LLMQualityChecker
@@ -89,13 +90,17 @@ def check(
         quality_llm = LLMQualityChecker()
         if quality_llm.is_available():
             helloandy = quality_llm.check(parsed)
+            llm_trigger = quality_llm.extract_trigger()
+            trigger = llm_trigger if llm_trigger else TriggerChecker().check(parsed)
         else:
             typer.echo(
                 "Warning: --llm set but no ANTHROPIC_API_KEY, using fallback",
                 err=True,
             )
+            trigger = TriggerChecker().check(parsed)
             helloandy = HelloAndyChecker().check(parsed)
     else:
+        trigger = TriggerChecker().check(parsed)
         helloandy = HelloAndyChecker().check(parsed)
 
     dimensions = [trigger, helloandy]

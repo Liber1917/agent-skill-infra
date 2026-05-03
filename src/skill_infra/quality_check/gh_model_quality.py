@@ -70,6 +70,7 @@ class GitHubModelQualityChecker:
     ) -> None:
         self.model = model
         self._token = github_token or os.environ.get("GITHUB_TOKEN")
+        self._last_response: str = ""
 
     def check(self, parsed: ParsedSkill) -> DimensionScore:
         """Evaluate using GitHub Models or fall back to keyword-based."""
@@ -78,9 +79,29 @@ class GitHubModelQualityChecker:
 
         try:
             response = self._call_api(parsed)
+            self._last_response = response
             return self._parse_response(response)
         except Exception as exc:
+            self._last_response = ""
             return self._fallback_check(parsed, f"GitHub Models API error: {exc}")
+
+    def extract_trigger(self) -> DimensionScore | None:
+        """Extract trigger_precision from last LLM response."""
+        if not self._last_response:
+            return None
+        try:
+            data = json.loads(self._last_response)
+            for dim in data.get("dimensions", []):
+                if dim.get("name") == "trigger_precision":
+                    score = max(0.0, min(1.0, float(dim.get("score", 0.5))))
+                    return DimensionScore(
+                        name="trigger_precision",
+                        score=score,
+                        findings=dim.get("findings", []),
+                    )
+        except Exception:
+            pass
+        return None
 
     def is_available(self) -> bool:
         return bool(self._token)

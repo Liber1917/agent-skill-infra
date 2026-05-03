@@ -69,6 +69,7 @@ class LLMQualityChecker:
     ) -> None:
         self.model = model
         self._api_key = api_key or os.environ.get("ANTHROPIC_API_KEY")
+        self._last_response: str = ""
 
     def check(self, parsed: ParsedSkill) -> DimensionScore:
         """Evaluate using LLM or fall back to keyword-based checker."""
@@ -77,14 +78,34 @@ class LLMQualityChecker:
 
         try:
             response = self._call_llm(parsed)
+            self._last_response = response
             return self._parse_response(response)
         except Exception as exc:
-            # Graceful fallback on error
+            self._last_response = ""
             return DimensionScore(
                 name=self._DIM_NAME,
                 score=0.5,
                 findings=[f"LLM evaluation failed: {exc}, using approximate score"],
             )
+
+    def extract_trigger(self) -> DimensionScore | None:
+        """Extract trigger_precision from last LLM response."""
+        if not self._last_response:
+            return None
+        try:
+            import json as _json
+            data = _json.loads(self._last_response)
+            for dim in data.get("dimensions", []):
+                if dim.get("name") == "trigger_precision":
+                    score = max(0.0, min(1.0, float(dim.get("score", 0.5))))
+                    return DimensionScore(
+                        name="trigger_precision",
+                        score=score,
+                        findings=dim.get("findings", []),
+                    )
+        except Exception:
+            pass
+        return None
 
     def is_available(self) -> bool:
         """Check if LLM evaluation is available."""
