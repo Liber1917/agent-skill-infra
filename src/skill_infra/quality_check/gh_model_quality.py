@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import json
 import os
+import random
 
 from skill_infra.quality_check.parser import ParsedSkill
 from skill_infra.quality_check.scorecard import DimensionScore
@@ -16,39 +17,56 @@ from skill_infra.quality_check.scorecard import DimensionScore
 _ENDPOINT = "https://models.github.ai/inference/chat/completions"
 _DEFAULT_MODEL = "gpt-4o-mini"
 
-_SYSTEM_PROMPT = (
-    "You are a quality evaluator for Agent Skill definitions (SKILL.md files). "
-    "Evaluate the skill across 8 dimensions and return ONLY a JSON object.\n\n"
-    "Scoring guide: Score each dimension independently on a 0-1 scale. "
-    "Use the full range. Avoid giving identical scores across dimensions "
-    "unless they are truly identical in quality.\n\n"
-    "Dimensions:\n"
-    "1. trigger_precision: Are there specific trigger keywords/scenarios in "
-    "the description? Generic phrases without concrete triggers = low. "
-    "Score 0-1.\n"
-    "2. output_completeness: Is output format documented? Are there "
-    "input/output examples? Score 0-1.\n"
-    "3. rule_specificity: Are there explicit mandatory rules and forbidden "
-    "actions? Score 0-1.\n"
-    "4. error_recovery: Does the skill specify what to do on failure, "
-    "timeout, or missing input? Score 0-1.\n"
-    "5. example_quality: Are there working code blocks with concrete "
-    "input/output? Score 0-1.\n"
-    "6. conciseness: Is content dense without filler? "
-    "Score 0-1.\n"
-    "7. consistency: No contradictory instructions. Description matches "
-    "body content. Score 0-1.\n"
-    "8. edge_cases: Handles null, empty, malformed, oversized input? "
-    "Score 0-1.\n\n"
-    "Respond with JSON only. For each dimension, include BOTH "
-    "'findings' (what was observed) AND 'improvements' "
-    "(actionable suggestions, 1-2 sentences each).\n\n"
-    "JSON format:\n"
-    '{"dimensions":[{"name":"...","score":0.X,'
-    '"findings":["..."],"improvements":["..."]},...],'
-    '"overall_score":0.X,'
-    '"summary":"1-2 sentence overall summary with top 3 priorities"}'
-)
+# Dimension definitions: (name, description). Order is shuffled per call
+# to eliminate position bias (Xu et al., 2026).
+_DIMENSIONS: list[tuple[str, str]] = [
+    ("trigger_precision",
+     "Are there specific trigger keywords/scenarios in the description? "
+     "Generic phrases without concrete triggers = low. Score 0-1."),
+    ("output_completeness",
+     "Is output format documented? Are there input/output examples? Score 0-1."),
+    ("rule_specificity",
+     "Are there explicit mandatory rules and forbidden actions? Score 0-1."),
+    ("error_recovery",
+     "Does the skill specify what to do on failure, timeout, or missing input? Score 0-1."),
+    ("example_quality",
+     "Are there working code blocks with concrete input/output? Score 0-1."),
+    ("conciseness",
+     "Is content dense without filler? Score 0-1."),
+    ("consistency",
+     "No contradictory instructions. Description matches body content. Score 0-1."),
+    ("edge_cases",
+     "Handles null, empty, malformed, oversized input? Score 0-1."),
+]
+
+def _shuffled_dimensions() -> list[tuple[str, str]]:
+    """Return dimensions in random order to eliminate position bias."""
+    dims = list(_DIMENSIONS)
+    random.shuffle(dims)
+    return dims
+
+
+def _build_system_prompt(dims: list[tuple[str, str]]) -> str:
+    """Build system prompt with given dimension order."""
+    lines = "\n".join(
+        f"{i}. {name}: {desc}" for i, (name, desc) in enumerate(dims, 1)
+    )
+    return (
+        "You are a quality evaluator for Agent Skill definitions (SKILL.md files). "
+        "Evaluate the skill across 8 dimensions and return ONLY a JSON object.\n\n"
+        "Scoring guide: Score each dimension independently on a 0-1 scale. "
+        "Use the full range. Avoid identical scores across dimensions "
+        "unless they are truly identical in quality.\n\n"
+        f"Dimensions:\n{lines}\n\n"
+        "Respond with JSON only. For each dimension, include BOTH "
+        "'findings' (what was observed) AND 'improvements' "
+        "(actionable suggestions, 1-2 sentences each).\n\n"
+        'JSON format:\n'
+        '{"dimensions":[{"name":"...","score":0.X,'
+        '"findings":["..."],"improvements":["..."]},...],'
+        '"overall_score":0.X,'
+        '"summary":"1-2 sentence overall summary with top 3 priorities"}'
+    )
 
 _USER_TEMPLATE = (
     "## Skill Frontmatter\n"
@@ -164,7 +182,7 @@ class GitHubModelQualityChecker:
                 json={
                     "model": self.model,
                     "messages": [
-                        {"role": "system", "content": _SYSTEM_PROMPT},
+                        {"role": "system", "content": _build_system_prompt(_shuffled_dimensions())},
                         {"role": "user", "content": user_message},
                     ],
                     "temperature": 0.1,
