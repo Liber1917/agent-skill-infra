@@ -371,8 +371,13 @@ def generate_report(
 
     # Quality score line for skill-type repos
     if quality_score is not None:
-        label = "Good" if quality_score >= 0.7 else "Fair" if quality_score >= 0.5 else "Needs Work"
-        lines.append(f"| **Quality Score** | {quality_score:.0%} ({label}) |")
+        if quality_score >= 0.66:
+            label, emoji = "Pass", "✅"
+        elif quality_score >= 0.50:
+            label, emoji = "Quarantine", "⚠️"
+        else:
+            label, emoji = "Reject", "❌"
+        lines.append(f"| **Quality Score** | {quality_score:.0%} ({emoji} {label}) |")
 
     lines.append("")
 

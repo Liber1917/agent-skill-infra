@@ -33,6 +33,25 @@ class QualityReport:
     score_interval: str = ""  # e.g. "41% ± 2%"
 
     @property
+    def decision(self) -> str:
+        """Three-state output based on overall score.
+        
+        Thresholds calibrated on n=27 OpenClaw official skills:
+        P25=63, P50=66, P75=70. Conservative pass at median.
+        """
+        if self.overall_score >= 0.66:
+            return "pass"
+        if self.overall_score >= 0.50:
+            return "quarantine"
+        return "reject"
+
+    @property
+    def decision_label(self) -> str:
+        """Human-readable decision with emoji."""
+        labels = {"pass": "✅ pass", "quarantine": "⚠️ quarantine", "reject": "❌ reject"}
+        return labels.get(self.decision, self.decision)
+
+    @property
     def overall_label(self) -> str:
         """Human-readable overall score as percentage."""
         return f"{self.overall_score:.0%}"

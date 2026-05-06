@@ -167,7 +167,8 @@ def check(
 def _print_table(report: QualityReport) -> None:
     """Print report as a human-readable table."""
     typer.echo(f"Quality Report: {report.skill_name}")
-    typer.echo(f"Overall Score: {report.overall_label}")
+    typer.echo(f"Overall Score: {report.overall_label} — {report.decision_label}")
+    typer.echo(f"Model: {report.model}")
     typer.echo(f"File: {report.file_path}")
     typer.echo(f"Lines: {report.total_lines} | Est. Tokens: {report.token_estimate}")
     typer.echo()
@@ -188,6 +189,8 @@ def _print_json(report: QualityReport) -> None:
     data = {
         "skill_name": report.skill_name,
         "overall_score": report.overall_score,
+        "decision": report.decision,
+        "model": report.model,
         "file_path": report.file_path,
         "total_lines": report.total_lines,
         "token_estimate": report.token_estimate,
