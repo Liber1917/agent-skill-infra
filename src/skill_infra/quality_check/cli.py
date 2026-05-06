@@ -172,6 +172,11 @@ def discover(
         default=None,
         help="Path to the SKILL.md file or skill directory.",
     ),
+    gh_models: bool = typer.Option(
+        False,
+        "--gh-models",
+        help="Use GitHub Models API (requires GITHUB_TOKEN).",
+    ),
     output: str = typer.Option(
         "table",
         "--output",
