@@ -298,6 +298,16 @@ def suggest(
         "--gh-models",
         help="Use GitHub Models API for quality evaluation (requires GITHUB_TOKEN).",
     ),
+    llm: bool = typer.Option(
+        False,
+        "--llm",
+        help="Use Anthropic LLM for quality evaluation (requires ANTHROPIC_API_KEY).",
+    ),
+    output_fmt: str = typer.Option(
+        "table",
+        "--output",
+        help="Output format (table | json).",
+    ),
 ) -> None:
     """Generate quality improvement suggestions for a SKILL.md file."""
     target = skill_path
