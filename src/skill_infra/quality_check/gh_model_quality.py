@@ -19,23 +19,29 @@ _DEFAULT_MODEL = "gpt-4o-mini"
 _SYSTEM_PROMPT = (
     "You are a quality evaluator for Agent Skill definitions (SKILL.md files). "
     "Evaluate the skill across 8 dimensions and return ONLY a JSON object.\n\n"
+    "Scoring guide: Use the FULL 0-1 range. 0.0=completely absent. "
+    "0.3=mentioned but vague. 0.5=adequate. 0.7=clear and specific. "
+    "0.9+=exceptional. Most skills should distribute across 0.2-0.8.\n\n"
     "Dimensions:\n"
-    "1. trigger_precision: How well does the description specify when to activate? "
-    "Are there clear trigger keywords? Score 0-1.\n"
-    "2. output_completeness: Is the output format documented? Are examples provided? "
+    "1. trigger_precision: Are there specific trigger keywords/scenarios in "
+    "the description? Generic phrases without concrete triggers = 0.2. "
     "Score 0-1.\n"
-    "3. rule_specificity: Are there concrete mandatory rules and forbidden actions? "
-    "Score 0-1.\n"
-    "4. error_recovery: Does the skill handle edge cases, failures, and fallbacks? "
-    "Score 0-1.\n"
-    "5. example_quality: Are there code blocks, input/output examples? Score 0-1.\n"
-    "6. conciseness: Is the skill compact without unnecessary repetition? Score 0-1.\n"
-    "7. consistency: No contradictory statements, description matches content. "
-    "Score 0-1.\n"
-    "8. edge_cases: Does the skill handle null, missing, malformed inputs? "
-    "Score 0-1.\n\n"
-    "Respond with JSON only (no markdown, no explanation). For each dimension,\n"
-    "include BOTH 'findings' (what was observed) AND 'improvements' "
+    "2. output_completeness: Is output format documented? Are there "
+    "input/output examples? No examples = 0.2. Score 0-1.\n"
+    "3. rule_specificity: Are there explicit mandatory rules and forbidden "
+    "actions? Vague guidelines = 0.3. Score 0-1.\n"
+    "4. error_recovery: Does the skill specify what to do on failure, "
+    "timeout, or missing input? No error handling = 0.0. Score 0-1.\n"
+    "5. example_quality: Are there working code blocks with concrete "
+    "input/output? Placeholder examples = 0.3. Score 0-1.\n"
+    "6. conciseness: Is content dense without filler? Repetitive "
+    "paragraphs = 0.3. Score 0-1.\n"
+    "7. consistency: No contradictory instructions. Description matches "
+    "body content. Mismatch = 0.2. Score 0-1.\n"
+    "8. edge_cases: Handles null, empty, malformed, oversized input? "
+    "No mention = 0.0. Score 0-1.\n\n"
+    "Respond with JSON only. For each dimension, include BOTH "
+    "'findings' (what was observed) AND 'improvements' "
     "(actionable suggestions, 1-2 sentences each).\n\n"
     "JSON format:\n"
     '{"dimensions":[{"name":"...","score":0.X,'
@@ -161,7 +167,7 @@ class GitHubModelQualityChecker:
                         {"role": "system", "content": _SYSTEM_PROMPT},
                         {"role": "user", "content": user_message},
                     ],
-                    "temperature": 0.3,
+                    "temperature": 0.0,
                     "max_tokens": 1024,
                 },
             )
