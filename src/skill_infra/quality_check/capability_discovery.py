@@ -97,17 +97,17 @@ _SYSTEM_PROMPT = (
     "- Code examples and workflow patterns\n"
     "- Domain knowledge and expertise area\n\n"
     "Respond with ONLY a JSON object. No markdown fences, no explanation.\n\n"
-    'JSON format:\n'
+    "JSON format:\n"
     '{"summary": "1-2 sentence overview of skill\'s capability landscape",\n'
     '"capabilities": [\n'
-    '  {\n'
+    "  {\n"
     '    "name": "short_label",\n'
     '    "description": "What this capability does (1 sentence)",\n'
     '    "is_current": true|false,\n'
     '    "confidence": 0.X,\n'
     '    "evidence": ["specific line/quotation from skill"],\n'
-    "    \"expansion_suggestion\": \"How to extend this or fill gaps\"\n"
-    '  }\n'
+    '    "expansion_suggestion": "How to extend this or fill gaps"\n'
+    "  }\n"
     "]}\n\n"
     "Aim for 3-6 current capabilities and 2-4 potential capabilities. "
     "Be specific — vague capabilities like 'general_help' should be avoided. "
@@ -205,19 +205,21 @@ class CapabilityDiscoverer:
             choices = data.get("choices", [])
             if choices:
                 return choices[0]["message"]["content"]
-            return json.dumps({
-                "summary": "Empty response from API",
-                "capabilities": [
-                    {
-                        "name": "unknown",
-                        "description": "Unable to analyze — empty API response",
-                        "is_current": True,
-                        "confidence": 0.0,
-                        "evidence": [],
-                        "expansion_suggestion": "Retry with valid API response",
-                    }
-                ],
-            })
+            return json.dumps(
+                {
+                    "summary": "Empty response from API",
+                    "capabilities": [
+                        {
+                            "name": "unknown",
+                            "description": "Unable to analyze — empty API response",
+                            "is_current": True,
+                            "confidence": 0.0,
+                            "evidence": [],
+                            "expansion_suggestion": "Retry with valid API response",
+                        }
+                    ],
+                }
+            )
 
     @staticmethod
     def _parse_response(response: str) -> dict:
@@ -292,8 +294,7 @@ class CapabilityDiscoverer:
                         confidence=0.4,
                         evidence=["Derived from skill description keyword: 'generate'/'create'"],
                         expansion_suggestion=(
-                            "Add output templates and examples"
-                            " for generated content"
+                            "Add output templates and examples for generated content"
                         ),
                     )
                 )
@@ -308,8 +309,7 @@ class CapabilityDiscoverer:
                     confidence=0.3,
                     evidence=[],
                     expansion_suggestion=(
-                        "Review skill body for reusable patterns"
-                        " that could generalize"
+                        "Review skill body for reusable patterns that could generalize"
                     ),
                 )
             )

@@ -201,9 +201,7 @@ class TestCLIGenerate:
             "version": "0.1.0",
             "cases": _MOCK_CASES_RESPONSE["cases"],
         }
-        (tmp_path / "evals.json").write_text(
-            json.dumps(output_data), encoding="utf-8"
-        )
+        (tmp_path / "evals.json").write_text(json.dumps(output_data), encoding="utf-8")
 
         with patch(
             "skill_infra.test_runner.auto_evals.AutoEvalsGenerator",
@@ -228,9 +226,7 @@ class TestCLIGenerate:
             "version": "0.1.0",
             "cases": _MOCK_CASES_RESPONSE["cases"],
         }
-        (skill_dir / "evals.json").write_text(
-            json.dumps(output_data), encoding="utf-8"
-        )
+        (skill_dir / "evals.json").write_text(json.dumps(output_data), encoding="utf-8")
 
         with patch(
             "skill_infra.test_runner.auto_evals.AutoEvalsGenerator",
@@ -291,9 +287,7 @@ class TestCLIGenerate:
             "version": "0.1.0",
             "cases": _MOCK_CASES_RESPONSE["cases"],
         }
-        (tmp_path / "evals.json").write_text(
-            json.dumps(output_data), encoding="utf-8"
-        )
+        (tmp_path / "evals.json").write_text(json.dumps(output_data), encoding="utf-8")
 
         with patch(
             "skill_infra.test_runner.auto_evals.AutoEvalsGenerator",
@@ -302,4 +296,3 @@ class TestCLIGenerate:
             result = runner.invoke(app, ["generate", str(skill_md), "--output", str(custom_output)])
             assert result.exit_code == 0
             assert custom_output.exists()
-

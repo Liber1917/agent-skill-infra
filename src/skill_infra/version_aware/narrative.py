@@ -23,8 +23,8 @@ _SYSTEM_PROMPT = (
     '"affected_sections":["section1","section2",...],'
     '"dimension_analysis":['
     '  {"dimension":"name","before_score":0.X,"after_score":0.X,"delta":+/-0.X,'
-    '   "analysis":"why this dimension likely changed (or \"unchanged\")"}'
-    ']}'
+    '   "analysis":"why this dimension likely changed (or "unchanged")"}'
+    "]}"
 )
 
 _USER_TEMPLATE = (
@@ -169,11 +169,13 @@ class ChangeNarrator:
             choices = data.get("choices", [])
             if choices:
                 return choices[0]["message"]["content"]
-            return json.dumps({
-                "summary": "API returned empty response.",
-                "affected_sections": [],
-                "dimension_analysis": [],
-            })
+            return json.dumps(
+                {
+                    "summary": "API returned empty response.",
+                    "affected_sections": [],
+                    "dimension_analysis": [],
+                }
+            )
 
     @staticmethod
     def _parse_response(
@@ -262,9 +264,7 @@ class ChangeNarrator:
                 before = before_scores.get(dim_name, 0.0)
                 after = after_scores.get(dim_name, before)
                 delta = round(after - before, 4)  # avoid float precision noise
-                direction = (
-                    "increased" if delta > 0 else "decreased" if delta < 0 else "unchanged"
-                )
+                direction = "increased" if delta > 0 else "decreased" if delta < 0 else "unchanged"
                 analysis = f"Score {direction} by {abs(delta):.2f}."
                 dimension_analysis.append(
                     DimensionNarrative(

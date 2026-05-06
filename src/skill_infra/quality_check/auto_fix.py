@@ -55,8 +55,7 @@ class AutoFixResult:
 def _build_suggest_prompt(report: QualityReport, parsed: ParsedSkill) -> str:
     """Build a system prompt asking the LLM to generate rewrite suggestions."""
     dim_lines = "\n".join(
-        f"  - {d.name}: score={d.score}, findings={d.findings}"
-        for d in report.dimensions
+        f"  - {d.name}: score={d.score}, findings={d.findings}" for d in report.dimensions
     )
 
     return (
@@ -180,8 +179,7 @@ class AutoFixSuggester:
                     "messages": [
                         {
                             "role": "system",
-                            "content": "You are a SKILL.md quality editor. "
-                            "Respond with JSON only.",
+                            "content": "You are a SKILL.md quality editor. Respond with JSON only.",
                         },
                         {"role": "user", "content": prompt},
                     ],
@@ -260,9 +258,7 @@ class AutoFixSuggester:
 
         for suggestion in result.suggestions:
             if suggestion.replace in new_content:
-                new_content = new_content.replace(
-                    suggestion.replace, suggestion.replace_with, 1
-                )
+                new_content = new_content.replace(suggestion.replace, suggestion.replace_with, 1)
                 suggestion.applied = True
             else:
                 suggestion.error = "Replace text not found in file"

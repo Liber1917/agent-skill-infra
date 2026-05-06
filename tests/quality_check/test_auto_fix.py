@@ -32,9 +32,7 @@ def _make_report(
     if dimensions is None:
         dimensions = [
             DimensionScore(name="trigger_precision", score=0.3, findings=["No clear triggers"]),
-            DimensionScore(
-                name="output_completeness", score=0.8, findings=["Has output examples"]
-            ),
+            DimensionScore(name="output_completeness", score=0.8, findings=["Has output examples"]),
             DimensionScore(name="rule_specificity", score=0.6, findings=["Some rules"]),
             DimensionScore(name="error_recovery", score=0.2, findings=["No error handling"]),
             DimensionScore(name="example_quality", score=0.7, findings=["Has examples"]),

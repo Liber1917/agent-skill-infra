@@ -24,12 +24,12 @@ _SYSTEM_PROMPT = (
     "trigger this skill.\n"
     "2. Each expected keyword list should contain 2-4 key Chinese "
     "words/phrases that MUST appear in the agent's response.\n"
-    "3. Use judge_type \"keyword\" with mode \"any\" and threshold 0.5.\n"
-    "4. Tag all cases with \"auto-generated\".\n\n"
+    '3. Use judge_type "keyword" with mode "any" and threshold 0.5.\n'
+    '4. Tag all cases with "auto-generated".\n\n'
     "Respond with JSON only, in this format:\n"
-    '{\n'
+    "{\n"
     '  "cases": [\n'
-    '    {\n'
+    "    {\n"
     '      "id": "auto-001",\n'
     '      "prompt": "...",\n'
     '      "judge_type": "keyword",\n'
@@ -37,12 +37,12 @@ _SYSTEM_PROMPT = (
     '        "keywords": ["key1", "key2"],\n'
     '        "mode": "any",\n'
     '        "threshold": 0.5\n'
-    '      },\n'
+    "      },\n"
     '      "tags": ["auto-generated"]\n'
-    '    }\n'
-    '  ]\n'
-    '}\n'
-    'Do NOT include any text outside the JSON.'
+    "    }\n"
+    "  ]\n"
+    "}\n"
+    "Do NOT include any text outside the JSON."
 )
 
 _USER_TEMPLATE = (

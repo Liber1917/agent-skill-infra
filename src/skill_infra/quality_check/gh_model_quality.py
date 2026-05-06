@@ -20,24 +20,26 @@ _DEFAULT_MODEL = "gpt-4o-mini"
 # Dimension definitions: (name, description). Order is shuffled per call
 # to eliminate position bias (Xu et al., 2026).
 _DIMENSIONS: list[tuple[str, str]] = [
-    ("trigger_precision",
-     "Are there specific trigger keywords/scenarios in the description? "
-     "Generic phrases without concrete triggers = low. Score 0-1."),
-    ("output_completeness",
-     "Is output format documented? Are there input/output examples? Score 0-1."),
-    ("rule_specificity",
-     "Are there explicit mandatory rules and forbidden actions? Score 0-1."),
-    ("error_recovery",
-     "Does the skill specify what to do on failure, timeout, or missing input? Score 0-1."),
-    ("example_quality",
-     "Are there working code blocks with concrete input/output? Score 0-1."),
-    ("conciseness",
-     "Is content dense without filler? Score 0-1."),
-    ("consistency",
-     "No contradictory instructions. Description matches body content. Score 0-1."),
-    ("edge_cases",
-     "Handles null, empty, malformed, oversized input? Score 0-1."),
+    (
+        "trigger_precision",
+        "Are there specific trigger keywords/scenarios in the description? "
+        "Generic phrases without concrete triggers = low. Score 0-1.",
+    ),
+    (
+        "output_completeness",
+        "Is output format documented? Are there input/output examples? Score 0-1.",
+    ),
+    ("rule_specificity", "Are there explicit mandatory rules and forbidden actions? Score 0-1."),
+    (
+        "error_recovery",
+        "Does the skill specify what to do on failure, timeout, or missing input? Score 0-1.",
+    ),
+    ("example_quality", "Are there working code blocks with concrete input/output? Score 0-1."),
+    ("conciseness", "Is content dense without filler? Score 0-1."),
+    ("consistency", "No contradictory instructions. Description matches body content. Score 0-1."),
+    ("edge_cases", "Handles null, empty, malformed, oversized input? Score 0-1."),
 ]
+
 
 def _shuffled_dimensions() -> list[tuple[str, str]]:
     """Return dimensions in random order to eliminate position bias."""
@@ -48,9 +50,7 @@ def _shuffled_dimensions() -> list[tuple[str, str]]:
 
 def _build_system_prompt(dims: list[tuple[str, str]]) -> str:
     """Build system prompt with given dimension order."""
-    lines = "\n".join(
-        f"{i}. {name}: {desc}" for i, (name, desc) in enumerate(dims, 1)
-    )
+    lines = "\n".join(f"{i}. {name}: {desc}" for i, (name, desc) in enumerate(dims, 1))
     return (
         "You are a quality evaluator for Agent Skill definitions (SKILL.md files). "
         "Evaluate the skill across 8 dimensions and return ONLY a JSON object.\n\n"
@@ -61,12 +61,13 @@ def _build_system_prompt(dims: list[tuple[str, str]]) -> str:
         "Respond with JSON only. For each dimension, include BOTH "
         "'findings' (what was observed) AND 'improvements' "
         "(actionable suggestions, 1-2 sentences each).\n\n"
-        'JSON format:\n'
+        "JSON format:\n"
         '{"dimensions":[{"name":"...","score":0.X,'
         '"findings":["..."],"improvements":["..."]},...],'
         '"overall_score":0.X,'
         '"summary":"1-2 sentence overall summary with top 3 priorities"}'
     )
+
 
 _USER_TEMPLATE = (
     "## Skill Frontmatter\n"

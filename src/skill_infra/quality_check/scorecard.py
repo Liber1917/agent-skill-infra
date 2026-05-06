@@ -35,7 +35,7 @@ class QualityReport:
     @property
     def decision(self) -> str:
         """Three-state output based on overall score.
-        
+
         Thresholds calibrated on n=27 OpenClaw official skills:
         P25=63, P50=66, P75=70. Conservative pass at median.
         """

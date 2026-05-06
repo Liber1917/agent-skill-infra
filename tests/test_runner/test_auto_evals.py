@@ -135,9 +135,13 @@ class TestAutoEvalsGenerator:
             AutoEvalsGenerator._parse_response("not valid json", "test", "1.0")
 
     def test_parse_response_sets_default_tags(self) -> None:
-        response = json.dumps({"cases": [
-            {"id": "t1", "prompt": "p1", "expected": {"kw": []}, "judge_type": "keyword"}
-        ]})
+        response = json.dumps(
+            {
+                "cases": [
+                    {"id": "t1", "prompt": "p1", "expected": {"kw": []}, "judge_type": "keyword"}
+                ]
+            }
+        )
         data = AutoEvalsGenerator._parse_response(response, "s", "1.0")
         assert data["cases"][0]["tags"] == []
 

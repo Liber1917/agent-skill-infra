@@ -223,26 +223,28 @@ class TestNarratorParseResponse:
     """Test JSON response parsing independently (no API needed)."""
 
     def test_parse_valid_json(self) -> None:
-        response = json.dumps({
-            "summary": "Added 3 examples and improved descriptions.",
-            "affected_sections": ["frontmatter", "examples", "usage"],
-            "dimension_analysis": [
-                {
-                    "dimension": "example_quality",
-                    "before_score": 0.4,
-                    "after_score": 0.9,
-                    "delta": 0.5,
-                    "analysis": "New examples are concrete and well-documented.",
-                },
-                {
-                    "dimension": "output_completeness",
-                    "before_score": 0.5,
-                    "after_score": 0.7,
-                    "delta": 0.2,
-                    "analysis": "Added input/output pairs.",
-                },
-            ],
-        })
+        response = json.dumps(
+            {
+                "summary": "Added 3 examples and improved descriptions.",
+                "affected_sections": ["frontmatter", "examples", "usage"],
+                "dimension_analysis": [
+                    {
+                        "dimension": "example_quality",
+                        "before_score": 0.4,
+                        "after_score": 0.9,
+                        "delta": 0.5,
+                        "analysis": "New examples are concrete and well-documented.",
+                    },
+                    {
+                        "dimension": "output_completeness",
+                        "before_score": 0.5,
+                        "after_score": 0.7,
+                        "delta": 0.2,
+                        "analysis": "Added input/output pairs.",
+                    },
+                ],
+            }
+        )
         result = ChangeNarrator._parse_response(response)
         assert "3 examples" in result.summary
         assert len(result.affected_sections) == 3
@@ -253,11 +255,17 @@ class TestNarratorParseResponse:
         assert result.dimension_analysis[0].before_score == 0.4
 
     def test_parse_json_with_code_fence(self) -> None:
-        response = "```json\n" + json.dumps({
-            "summary": "Minor wording fix.",
-            "affected_sections": ["usage"],
-            "dimension_analysis": [],
-        }) + "\n```"
+        response = (
+            "```json\n"
+            + json.dumps(
+                {
+                    "summary": "Minor wording fix.",
+                    "affected_sections": ["usage"],
+                    "dimension_analysis": [],
+                }
+            )
+            + "\n```"
+        )
         result = ChangeNarrator._parse_response(response)
         assert result.summary == "Minor wording fix."
         assert result.affected_sections == ["usage"]
@@ -268,16 +276,18 @@ class TestNarratorParseResponse:
         assert result.raw_response == "this is not json at all"
 
     def test_parse_missing_dimension_scores(self) -> None:
-        response = json.dumps({
-            "summary": "No scores provided.",
-            "affected_sections": ["overview"],
-            "dimension_analysis": [
-                {
-                    "dimension": "trigger_precision",
-                    "analysis": "unchanged",
-                },
-            ],
-        })
+        response = json.dumps(
+            {
+                "summary": "No scores provided.",
+                "affected_sections": ["overview"],
+                "dimension_analysis": [
+                    {
+                        "dimension": "trigger_precision",
+                        "analysis": "unchanged",
+                    },
+                ],
+            }
+        )
         result = ChangeNarrator._parse_response(response)
         assert len(result.dimension_analysis) == 1
         assert result.dimension_analysis[0].before_score is None
@@ -311,9 +321,12 @@ class TestCLINarrative:
             [
                 "diff",
                 str(self.repo),
-                "--old-ref", self.sha1,
-                "--new-ref", self.sha2,
-                "--output", "json",
+                "--old-ref",
+                self.sha1,
+                "--new-ref",
+                self.sha2,
+                "--output",
+                "json",
                 "--narrative",
             ],
         )
@@ -338,8 +351,10 @@ class TestCLINarrative:
             [
                 "diff",
                 str(self.repo),
-                "--old-ref", self.sha1,
-                "--new-ref", self.sha2,
+                "--old-ref",
+                self.sha1,
+                "--new-ref",
+                self.sha2,
                 "--narrative",
             ],
         )
@@ -359,8 +374,10 @@ class TestCLINarrative:
             [
                 "diff",
                 str(self.repo),
-                "--old-ref", self.sha1,
-                "--new-ref", self.sha2,
+                "--old-ref",
+                self.sha1,
+                "--new-ref",
+                self.sha2,
             ],
         )
         assert result.exit_code == 0
@@ -378,8 +395,10 @@ class TestCLINarrative:
             [
                 "diff",
                 str(self.repo),
-                "--old-ref", self.sha1,
-                "--new-ref", self.sha1,
+                "--old-ref",
+                self.sha1,
+                "--new-ref",
+                self.sha1,
                 "--narrative",
             ],
         )

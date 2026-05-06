@@ -60,27 +60,29 @@ class TestCapabilityDiscoverer:
             del os.environ["GITHUB_TOKEN"]
 
     def test_parse_valid_response(self) -> None:
-        response = json.dumps({
-            "summary": "Skill handles code analysis and review",
-            "capabilities": [
-                {
-                    "name": "code_review",
-                    "description": "Review code for bugs and style issues",
-                    "is_current": True,
-                    "confidence": 0.9,
-                    "evidence": ["Has review workflow section"],
-                    "expansion_suggestion": "Add automated fix suggestions",
-                },
-                {
-                    "name": "performance_analysis",
-                    "description": "Analyze code performance patterns",
-                    "is_current": False,
-                    "confidence": 0.6,
-                    "evidence": ["Mentions profiling tools"],
-                    "expansion_suggestion": "Add performance benchmarks",
-                },
-            ],
-        })
+        response = json.dumps(
+            {
+                "summary": "Skill handles code analysis and review",
+                "capabilities": [
+                    {
+                        "name": "code_review",
+                        "description": "Review code for bugs and style issues",
+                        "is_current": True,
+                        "confidence": 0.9,
+                        "evidence": ["Has review workflow section"],
+                        "expansion_suggestion": "Add automated fix suggestions",
+                    },
+                    {
+                        "name": "performance_analysis",
+                        "description": "Analyze code performance patterns",
+                        "is_current": False,
+                        "confidence": 0.6,
+                        "evidence": ["Mentions profiling tools"],
+                        "expansion_suggestion": "Add performance benchmarks",
+                    },
+                ],
+            }
+        )
         data = CapabilityDiscoverer._parse_response(response)
         report = CapabilityReport.from_api_response(data, skill_name="test")
         assert len(report.capabilities) == 2
@@ -104,27 +106,29 @@ class TestCapabilityDiscoverer:
         assert data["capabilities"] == []
 
     def test_confidence_clamping(self) -> None:
-        response = json.dumps({
-            "summary": "Test clamping",
-            "capabilities": [
-                {
-                    "name": "high_confidence",
-                    "description": "Over 1.0",
-                    "is_current": True,
-                    "confidence": 1.5,
-                    "evidence": [],
-                    "expansion_suggestion": "",
-                },
-                {
-                    "name": "low_confidence",
-                    "description": "Below 0.0",
-                    "is_current": False,
-                    "confidence": -0.5,
-                    "evidence": [],
-                    "expansion_suggestion": "",
-                },
-            ],
-        })
+        response = json.dumps(
+            {
+                "summary": "Test clamping",
+                "capabilities": [
+                    {
+                        "name": "high_confidence",
+                        "description": "Over 1.0",
+                        "is_current": True,
+                        "confidence": 1.5,
+                        "evidence": [],
+                        "expansion_suggestion": "",
+                    },
+                    {
+                        "name": "low_confidence",
+                        "description": "Below 0.0",
+                        "is_current": False,
+                        "confidence": -0.5,
+                        "evidence": [],
+                        "expansion_suggestion": "",
+                    },
+                ],
+            }
+        )
         data = CapabilityDiscoverer._parse_response(response)
         report = CapabilityReport.from_api_response(data)
         assert abs(report.capabilities[0].confidence - 1.0) < 0.01
