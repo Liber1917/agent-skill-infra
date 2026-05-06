@@ -8,6 +8,7 @@ from pathlib import Path
 import typer
 
 from skill_infra.version_aware.git_diff import parse_version_diff
+from skill_infra.version_aware.narrative import ChangeNarrator
 from skill_infra.version_aware.regression import RegressionDetector
 from skill_infra.version_aware.rollback import rollback_to
 from skill_infra.version_aware.security_diff import SecurityDiffAnalyzer
@@ -46,12 +47,31 @@ def diff(
         "-o",
         help="Output format: table or json.",
     ),
+    narrative: bool = typer.Option(
+        False,
+        "--narrative",
+        help="Generate LLM-powered change narrative from the diff.",
+    ),
 ) -> None:
-    """Show structured diff between two git refs."""
+    """Show structured diff between two git refs.
+
+    When --narrative is provided, generates an LLM-powered change narrative
+    describing WHAT changed and (if quality scores available) WHY scores shifted.
+    """
     vd = parse_version_diff(str(repo_path), old_ref, new_ref)
+    diff_text = "\n".join(f.patch for f in vd.files if f.patch)
+
+    # Generate narrative if requested
+    change_narrative = None
+    if narrative:
+        narrator = ChangeNarrator()
+        change_narrative = narrator.narrate(diff_text)
+        if not narrator.is_available():
+            msg = "(using keyword-based fallback — set GITHUB_TOKEN for LLM narratives)"
+            typer.echo(msg, err=True)
 
     if output == "json":
-        data = {
+        data: dict = {
             "old_sha": vd.old_sha,
             "new_sha": vd.new_sha,
             "files": [
@@ -64,17 +84,48 @@ def diff(
                 for f in vd.files
             ],
         }
+        if change_narrative:
+            data["narrative"] = {
+                "summary": change_narrative.summary,
+                "affected_sections": change_narrative.affected_sections,
+                "dimension_analysis": [
+                    {
+                        "dimension": d.dimension,
+                        "before_score": d.before_score,
+                        "after_score": d.after_score,
+                        "delta": d.delta,
+                        "analysis": d.analysis,
+                    }
+                    for d in change_narrative.dimension_analysis
+                ],
+            }
         typer.echo(json.dumps(data, indent=2))
         return
 
     typer.echo(f"Version Diff: {vd.old_sha[:8]}... -> {vd.new_sha[:8]}...")
     if not vd.files:
         typer.echo("0 files changed (empty)")
+        if change_narrative:
+            typer.echo(f"\nNarrative: {change_narrative.summary}")
         return
     typer.echo(f"{len(vd.files)} file(s) changed:")
     for f in vd.files:
         marker = "+" * min(f.additions, 10) + "-" * min(f.deletions, 10)
         typer.echo(f"  {f.status:8s} {f.path:40s} +{f.additions:3d} -{f.deletions:3d}  {marker}")
+
+    if change_narrative:
+        typer.echo("\n--- Change Narrative ---")
+        typer.echo(f"Summary: {change_narrative.summary}")
+        if change_narrative.affected_sections:
+            typer.echo(f"Affected: {', '.join(change_narrative.affected_sections)}")
+        if change_narrative.dimension_analysis:
+            typer.echo("Dimension Analysis:")
+            for d in change_narrative.dimension_analysis:
+                score_info = ""
+                if d.delta is not None:
+                    sign = "+" if d.delta > 0 else ""
+                    score_info = f" ({sign}{d.delta:.2f})"
+                typer.echo(f"  {d.dimension}: {d.analysis}{score_info}")
 
 
 # ---------------------------------------------------------------------------

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import shutil
 from datetime import UTC
 from pathlib import Path
 
@@ -104,6 +105,58 @@ async def _run_with_fail_fast(
         started_at=started_at,
         elapsed_ms=elapsed,
     )
+
+
+@app.command()
+def generate(
+    skill_path: Path = typer.Argument(
+        help="Path to SKILL.md file or skill directory (looking for SKILL.md inside).",
+    ),
+    output: Path | None = typer.Option(
+        None,
+        "--output",
+        "-o",
+        help="Path to write evals.json to (default: evals.json next to SKILL.md).",
+    ),
+) -> None:
+    """Auto-generate evals.json test prompts from a SKILL.md file using LLM."""
+    from skill_infra.quality_check.parser import parse_skill_md
+    from skill_infra.test_runner.auto_evals import AutoEvalsGenerator
+
+    # Resolve path: if directory, look for SKILL.md inside
+    target = skill_path
+    if target.is_dir():
+        target = target / "SKILL.md"
+    if not target.exists():
+        typer.echo(f"Error: {target} not found", err=True)
+        raise typer.Exit(code=1)
+
+    try:
+        parsed = parse_skill_md(str(target))
+    except FileNotFoundError as exc:
+        typer.echo(f"Error: {exc}", err=True)
+        raise typer.Exit(code=1) from None
+
+    generator = AutoEvalsGenerator()
+    if not generator.is_available():
+        typer.echo(
+            "Error: GITHUB_TOKEN not set. Required for LLM-based evals generation.",
+            err=True,
+        )
+        raise typer.Exit(code=1)
+
+    try:
+        output_dir = output.parent if output else target.parent
+        evals_path = generator.generate(parsed, output_dir)
+        if output and output != evals_path:
+            shutil.move(str(evals_path), str(output))
+            evals_path = output
+
+        case_count = len(json.loads(evals_path.read_text(encoding="utf-8")).get("cases", []))
+        typer.echo(f"Generated {case_count} test case(s) -> {evals_path}")
+    except Exception as exc:
+        typer.echo(f"Error: {exc}", err=True)
+        raise typer.Exit(code=1) from None
 
 
 @app.command()
