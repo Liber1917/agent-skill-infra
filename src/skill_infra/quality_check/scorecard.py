@@ -29,6 +29,8 @@ class QualityReport:
     file_path: str = ""
     total_lines: int = 0
     token_estimate: int = 0
+    model: str = ""  # e.g. "gpt-4o-mini"
+    score_interval: str = ""  # e.g. "41% ± 2%"
 
     @property
     def overall_label(self) -> str:

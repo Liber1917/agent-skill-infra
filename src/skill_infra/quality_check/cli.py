@@ -150,6 +150,12 @@ def check(
         total_lines=parsed.total_lines,
         token_estimate=parsed.token_estimate,
     )
+    if gh_models:
+        report.model = "gpt-4o-mini (GitHub Models)"
+    elif llm:
+        report.model = "claude-sonnet-4 (Anthropic)"
+    else:
+        report.model = "keyword-heuristic"
 
     # Output
     if output == "json":

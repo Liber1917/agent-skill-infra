@@ -167,7 +167,7 @@ class GitHubModelQualityChecker:
                         {"role": "system", "content": _SYSTEM_PROMPT},
                         {"role": "user", "content": user_message},
                     ],
-                    "temperature": 0.0,
+                    "temperature": 0.1,
                     "max_tokens": 1024,
                 },
             )
