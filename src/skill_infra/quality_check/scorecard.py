@@ -48,7 +48,11 @@ class QualityReport:
     @property
     def decision_label(self) -> str:
         """Human-readable decision with emoji."""
-        labels = {"pass": "✅ pass", "quarantine": "⚠️ quarantine", "reject": "❌ reject"}
+        labels = {
+            "pass": "✅ SKILL.md well-documented",
+            "quarantine": "⚠️ SKILL.md needs improvement",
+            "reject": "❌ SKILL.md requires revision",
+        }
         return labels.get(self.decision, self.decision)
 
     @property
