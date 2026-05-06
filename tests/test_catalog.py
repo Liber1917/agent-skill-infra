@@ -144,7 +144,7 @@ def test_cli_subcommand_counts() -> None:
     version_total = len(version_cmds) + len(version_group_cmds)
 
     assert len(test_cmds) == 3, f"skill-test: expected 3 commands, got {test_cmds}"
-    assert len(quality_cmds) == 1, f"skill-quality: expected 1 command, got {quality_cmds}"
+    assert len(quality_cmds) == 3, f"skill-quality: expected 3 commands, got {quality_cmds}"
     assert version_total == 5, (
         f"skill-version: expected 5 commands, got {version_cmds} + {version_group_cmds}"
     )

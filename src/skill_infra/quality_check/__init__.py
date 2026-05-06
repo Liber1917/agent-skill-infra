@@ -1,5 +1,6 @@
 """Quality check module for agent-skill-infra."""
 
+from skill_infra.quality_check.auto_fix import AutoFixResult, AutoFixSuggester, SuggestResult
 from skill_infra.quality_check.checkers import (
     HelloAndyChecker,
     OutputChecker,
@@ -16,6 +17,8 @@ from skill_infra.quality_check.parser import ParsedSkill, parse_skill_md
 from skill_infra.quality_check.scorecard import DimensionScore, QualityReport
 
 __all__ = [
+    "AutoFixResult",
+    "AutoFixSuggester",
     "DimensionScore",
     "HelloAndyChecker",
     "LinterAdapter",
@@ -24,6 +27,7 @@ __all__ = [
     "OutputChecker",
     "ParsedSkill",
     "QualityReport",
+    "SuggestResult",
     "TokenChecker",
     "ToleranceChecker",
     "TriggerChecker",

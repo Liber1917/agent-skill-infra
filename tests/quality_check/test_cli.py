@@ -49,14 +49,14 @@ class TestQualityCheckCLI:
                 Example: analyze rte_memcpy on ARM.
             """),
         )
-        result = runner.invoke(app, [str(skill_md)])
+        result = runner.invoke(app, ["check", str(skill_md)])
         # Only check output content, not exit_code (depends on score threshold)
         assert "test-skill" in result.output
         assert "trigger" in result.output.lower()
 
     def test_check_json_output(self, tmp_path) -> None:
         skill_md = _create_skill_md(tmp_path)
-        result = runner.invoke(app, [str(skill_md), "--output", "json"])
+        result = runner.invoke(app, ["check", str(skill_md), "--output", "json"])
         assert result.exit_code == 0
         data = json.loads(result.output)
         assert data["skill_name"] == "test-skill"
@@ -64,6 +64,38 @@ class TestQualityCheckCLI:
         assert "dimensions" in data
 
     def test_check_nonexistent_file(self, tmp_path) -> None:
-        result = runner.invoke(app, [str(tmp_path / "nonexistent.md")])
+        result = runner.invoke(app, ["check", str(tmp_path / "nonexistent.md")])
+        assert result.exit_code != 0
+        assert "not found" in result.output.lower()
+
+    def test_discover_basic(self, tmp_path) -> None:
+        skill_md = _create_skill_md(
+            tmp_path,
+            description="Analyze code performance",
+            body=textwrap.dedent("""\
+                ## Output Format
+
+                JSON with fields: score, reason.
+
+                ## Error Handling
+
+                If tool not available, skip and continue.
+            """),
+        )
+        result = runner.invoke(app, ["discover", str(skill_md)])
+        # Fallback analysis should produce output
+        assert "Current" in result.output or "Capability" in result.output
+
+    def test_discover_json_output(self, tmp_path) -> None:
+        skill_md = _create_skill_md(tmp_path)
+        result = runner.invoke(app, ["discover", str(skill_md), "--output", "json"])
+        assert result.exit_code == 0
+        data = json.loads(result.output)
+        assert data["skill_name"] == "test-skill"
+        assert "capabilities" in data
+        assert "total_current" in data
+
+    def test_discover_nonexistent_file(self, tmp_path) -> None:
+        result = runner.invoke(app, ["discover", str(tmp_path / "nonexistent.md")])
         assert result.exit_code != 0
         assert "not found" in result.output.lower()
