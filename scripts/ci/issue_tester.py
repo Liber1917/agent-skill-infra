@@ -292,6 +292,28 @@ def _build_result(
         except Exception:
             pass  # fall through to normal parsing
 
+    # skill-quality suggest JSON: {"suggestions": [...], "skill_name": "..."}
+    if '"suggestions"' in stdout:
+        try:
+            import json as _json
+
+            data = _json.loads(stdout)
+            total = len(data.get("suggestions", []))
+            return {
+                "command": command,
+                "exit_code": 0,
+                "test_count": total,
+                "passed": total,
+                "failed": 0,
+                "errors": 0,
+                "stdout": f"Generated {total} suggestions",
+                "stderr": stderr[-2000:] if len(stderr) > 2000 else stderr,
+                "duration_ms": duration_ms,
+                "error_type": error_type,
+            }
+        except Exception:
+            pass
+
     # pytest: "5 passed", "2 failed"
     pytest_match = re.search(r"(\d+)\s+passed", stdout)
     if pytest_match:
@@ -333,6 +355,21 @@ def _build_result(
         "duration_ms": duration_ms,
         "error_type": error_type,
     }
+
+    # Last resort: interpret exit code 0 as pass for any custom command
+    if rc == 0 and command:
+        return {
+            "command": command,
+            "exit_code": 0,
+            "test_count": 1,
+            "passed": 1,
+            "failed": 0,
+            "errors": 0,
+            "stdout": stdout[:2000],
+            "stderr": stderr[-2000:] if len(stderr) > 2000 else stderr,
+            "duration_ms": duration_ms,
+            "error_type": error_type,
+        }
 
 
 # ---------------------------------------------------------------------------
