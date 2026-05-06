@@ -66,14 +66,15 @@ def parse_issue_body(body: str) -> dict[str, str]:
         # GitHub issue forms use "### Field Label" as headers
         if stripped.startswith("### "):
             label = stripped[4:].strip()
-            # Map labels to field IDs
+            # Normalize label: strip "(optional)" suffix for robust matching
+            base_label = re.sub(r"\s*\(optional\)\s*$", "", label).strip()
             mapping = {
                 "Repository URL": "repo_url",
-                "Branch (optional)": "branch",
-                "Custom test command (optional)": "test_command",
-                "Additional notes (optional)": "notes",
+                "Branch": "branch",
+                "Custom test command": "test_command",
+                "Additional notes": "notes",
             }
-            current_key = mapping.get(label)
+            current_key = mapping.get(base_label)
         elif current_key and stripped and not stripped.startswith("_"):
             # Skip the form description line (starts with _)
             val = stripped.strip()
