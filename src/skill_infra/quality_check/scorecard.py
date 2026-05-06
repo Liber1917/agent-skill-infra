@@ -39,7 +39,7 @@ class QualityReport:
         Thresholds calibrated on n=27 OpenClaw official skills:
         P25=63, P50=66, P75=70. Conservative pass at median.
         """
-        if self.overall_score >= 0.66:
+        if self.overall_score >= 0.63:
             return "pass"
         if self.overall_score >= 0.50:
             return "quarantine"

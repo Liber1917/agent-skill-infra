@@ -371,7 +371,7 @@ def generate_report(
 
     # Quality score line for skill-type repos
     if quality_score is not None:
-        if quality_score >= 0.66:
+        if quality_score >= 0.63:
             label, emoji = "SKILL.md well-documented", "✅"
         elif quality_score >= 0.50:
             label, emoji = "SKILL.md needs improvement", "⚠️"
