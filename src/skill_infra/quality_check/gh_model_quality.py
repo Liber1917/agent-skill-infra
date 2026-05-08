@@ -22,8 +22,9 @@ _DEFAULT_MODEL = "gpt-4o-mini"
 _DIMENSIONS: list[tuple[str, str]] = [
     (
         "trigger_precision",
-        "Are there specific trigger keywords/scenarios in the description? "
-        "Generic phrases without concrete triggers = low. Score 0-1.",
+        "Are there specific trigger keywords/scenarios in the description OR in the "
+        "'triggers' frontmatter field? Explicit YAML triggers list = high. "
+        "Generic description without concrete triggers = low. Score 0-1.",
     ),
     (
         "output_completeness",
@@ -72,7 +73,8 @@ def _build_system_prompt(dims: list[tuple[str, str]]) -> str:
 _USER_TEMPLATE = (
     "## Skill Frontmatter\n"
     "name: {name}\n"
-    "description: {description}\n\n"
+    "description: {description}\n"
+    "triggers: {triggers}\n\n"
     "## Skill Content\n{body}\n\n"
     "Evaluate this skill across all 8 dimensions. Respond with JSON only."
 )
@@ -163,10 +165,12 @@ class GitHubModelQualityChecker:
         import httpx
 
         desc = parsed.meta.description.strip() or parsed.meta.name
+        triggers = ", ".join(parsed.meta.triggers) if parsed.meta.triggers else "none"
         body = parsed.raw_body[:8000]  # gpt-4o-mini has large context
         user_message = _USER_TEMPLATE.format(
             name=parsed.meta.name,
             description=desc,
+            triggers=triggers,
             body=body,
         )
 

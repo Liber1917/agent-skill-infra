@@ -16,6 +16,7 @@ class TriggerChecker:
 
     def check(self, parsed: ParsedSkill) -> DimensionScore:
         desc = parsed.meta.description.strip()
+        triggers = parsed.meta.triggers  # YAML triggers list from frontmatter
         findings: list[str] = []
 
         if not desc:
@@ -24,6 +25,12 @@ class TriggerChecker:
                 score=0.0,
                 findings=["Description is empty"],
             )
+
+        # Bonus: explicit YAML triggers list — strong signal of precision
+        if triggers:
+            score = 0.9
+            findings.append(f"Explicit triggers defined in frontmatter: {len(triggers)} item(s)")
+            return DimensionScore(name=self._DIM_NAME, score=score, findings=findings)
 
         # Count meaningful keywords
         keywords = self._KEYWORD_PATTERN.findall(desc)
